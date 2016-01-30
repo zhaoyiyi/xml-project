@@ -43,10 +43,8 @@ System.register(['angular2/core', './map.service', 'rxjs/add/operator/distinctUn
                 };
                 MapComponent.prototype.updateRoute = function () {
                     var _this = this;
-                    this.routeInfoStream.distinctUntilChanged(function (a, b) {
-                        console.log('ab', a, b);
-                        return a.id === b.id;
-                    })
+                    this.routeInfoStream.
+                        distinctUntilChanged(function (a, b) { return a.id === b.id; })
                         .subscribe(function (data) { return _this._mapService.drawPath(data.coords); });
                 };
                 MapComponent.prototype.drawBuses = function () {

@@ -12,8 +12,12 @@
         "removeComments": true,
         "noLib": false,
         "preserveConstEnums": true,
+<<<<<<< HEAD
+        "suppressImplicitAnyIndexErrors": true
+=======
         "suppressImplicitAnyIndexErrors": true,
         "sourceMap": true
+>>>>>>> xmltest
     },
     "filesGlob": [
         "**/*.ts",

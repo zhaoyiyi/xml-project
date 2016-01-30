@@ -51,11 +51,9 @@ System.register(['angular2/core', 'angular2/http', 'angular2/common', './route.s
                     console.log('emitting route info...');
                     this.routeChange.emit(this._routeService.getRoute(routeNum));
                 };
-                RouteComponent.prototype.getBuses = function (routeNum) {
-                    return this._routeService.getBusLocations(routeNum);
-                };
                 RouteComponent.prototype.emitBusLocations = function (routeNum) {
-                    this.locationChange.emit(this.getBuses(routeNum));
+                    console.log('emitting bus locations...');
+                    this.locationChange.emit(this._routeService.getBusLocations(routeNum));
                 };
                 RouteComponent = __decorate([
                     core_1.Component({

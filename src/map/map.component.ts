@@ -1,10 +1,9 @@
 import {Component, OnInit, OnChanges} from 'angular2/core';
 import {MapService} from './map.service';
+
 import {Observable, Subscription} from 'rxjs';
 import * as Rx from 'rxjs/Rx';
-// import {Operator} from 'rxjs/Operator';
 import 'rxjs/add/operator/distinctUntilChanged';
-// import 'rxjs/add/operator/distinctUntilKeyChanged';
 import 'rxjs/add/operator/repeat';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/delay';
@@ -42,11 +41,8 @@ export class MapComponent implements OnInit, OnChanges{
   }
 
   updateRoute(){
-    this.routeInfoStream.distinctUntilChanged(
-      (a, b) => {
-        console.log('ab',a, b);
-        return a.id === b.id;
-      })
+    this.routeInfoStream.
+    distinctUntilChanged( (a, b) => a.id === b.id )
       .subscribe(data => this._mapService.drawPath(data.coords));
   }
 

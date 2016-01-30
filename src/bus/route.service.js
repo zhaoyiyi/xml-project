@@ -1,4 +1,4 @@
-System.register(['angular2/core', 'angular2/http', 'rxjs/add/operator/map', 'rxjs/add/operator/distinctUntilChanged'], function(exports_1) {
+System.register(['angular2/core', 'angular2/http', 'rxjs/add/operator/map'], function(exports_1) {
     "use strict";
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -19,8 +19,7 @@ System.register(['angular2/core', 'angular2/http', 'rxjs/add/operator/map', 'rxj
             function (http_1_1) {
                 http_1 = http_1_1;
             },
-            function (_1) {},
-            function (_2) {}],
+            function (_1) {}],
         execute: function() {
             URL = "http://webservices.nextbus.com/service/publicXMLFeed?a=ttc";
             RouteService = (function () {

@@ -1,7 +1,6 @@
 import {Injectable} from 'angular2/core';
 declare var google;
 
-
 @Injectable()
 export class MapService{
   private _map: any;
@@ -14,7 +13,6 @@ export class MapService{
 
   // clears stored info on the map.
   clear(obj){
-    console.log('route:', obj);
     if(obj){
       obj.map( line => line.setMap(null));
     }
@@ -64,7 +62,7 @@ export class MapService{
   // ie, add and delete without refreshing
   updateMarker(newPosition){
     if(this._buses){
-      console.log('updating bus locations...',this._buses);
+      console.log('updating bus locations...');
       this._buses.map( (bus, idx) => {
         if(newPosition.length === this._buses.length && bus.id === newPosition[idx].id){
           this.animateMarker(bus.marker, newPosition[idx], 5000);
@@ -74,7 +72,6 @@ export class MapService{
         }
       });
     }
-
   }
 
   iconOption(option){
@@ -89,7 +86,7 @@ export class MapService{
 
   setMarker(buses){
     if(this._buses) this.clearBuses(this._buses);
-    console.log('buses in bus service:',this._buses);
+    console.log('first time drawing buses for new route:');
     this._buses = buses.map( bus => {
       let marker = new google.maps.Marker({
         position: {lat: bus.lat, lng: bus.lng},

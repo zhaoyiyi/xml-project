@@ -26,7 +26,6 @@ System.register(['angular2/core'], function(exports_1) {
                     configurable: true
                 });
                 MapService.prototype.clear = function (obj) {
-                    console.log('route:', obj);
                     if (obj) {
                         obj.map(function (line) { return line.setMap(null); });
                     }
@@ -75,7 +74,7 @@ System.register(['angular2/core'], function(exports_1) {
                 MapService.prototype.updateMarker = function (newPosition) {
                     var _this = this;
                     if (this._buses) {
-                        console.log('updating bus locations...', this._buses);
+                        console.log('updating bus locations...');
                         this._buses.map(function (bus, idx) {
                             if (newPosition.length === _this._buses.length && bus.id === newPosition[idx].id) {
                                 _this.animateMarker(bus.marker, newPosition[idx], 5000);
@@ -100,7 +99,7 @@ System.register(['angular2/core'], function(exports_1) {
                     var _this = this;
                     if (this._buses)
                         this.clearBuses(this._buses);
-                    console.log('buses in bus service:', this._buses);
+                    console.log('first time drawing buses for new route:');
                     this._buses = buses.map(function (bus) {
                         var marker = new google.maps.Marker({
                             position: { lat: bus.lat, lng: bus.lng },
