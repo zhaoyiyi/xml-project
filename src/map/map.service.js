@@ -25,6 +25,58 @@ System.register(['angular2/core'], function(exports_1) {
                     enumerable: true,
                     configurable: true
                 });
+                MapService.prototype.drawPath = function (paths, clear) {
+                    var _this = this;
+                    if (clear === void 0) { clear = true; }
+                    if (this._lines && clear)
+                        this.clear(this._lines);
+                    if (this._bound)
+                        this._bound = new google.maps.LatLngBounds();
+                    this._lines = paths.map(function (path) {
+                        var line = new google.maps.Polyline({
+                            path: path,
+                            strokeColor: '#FF0000',
+                            strokeOpacity: 1.0,
+                            strokeWeight: 2
+                        });
+                        line.setMap(_this._map);
+                        path.map(function (point) { return _this.addToBound(point); });
+                        _this.zoom();
+                        return line;
+                    });
+                };
+                MapService.prototype.updateMarker = function (newPosition) {
+                    var _this = this;
+                    if (this._buses && newPosition.length === this._buses.length) {
+                        console.log('updating bus locations...');
+                        this._buses.map(function (bus, idx) {
+                            if (bus.id === newPosition[idx].id) {
+                                _this.animateMarker(bus.marker, newPosition[idx], 8000);
+                                bus.marker.setIcon(_this.iconOption(newPosition[idx]));
+                            }
+                        });
+                    }
+                    else {
+                        this.setMarker(newPosition);
+                    }
+                };
+                MapService.prototype.setMarker = function (buses) {
+                    var _this = this;
+                    if (this._buses)
+                        this.clearBuses(this._buses);
+                    console.log('first time drawing buses for new route:');
+                    this._buses = buses.map(function (bus) {
+                        var marker = new google.maps.Marker({
+                            position: { lat: bus.lat, lng: bus.lng },
+                            icon: _this.iconOption(bus),
+                            map: _this._map
+                        });
+                        return {
+                            id: bus.id,
+                            marker: marker
+                        };
+                    });
+                };
                 MapService.prototype.clear = function (obj) {
                     if (obj) {
                         obj.map(function (line) { return line.setMap(null); });
@@ -34,22 +86,6 @@ System.register(['angular2/core'], function(exports_1) {
                     if (buses) {
                         buses.map(function (bus) { return bus.marker.setMap(null); });
                     }
-                };
-                MapService.prototype.drawPath = function (paths, clear) {
-                    var _this = this;
-                    if (clear === void 0) { clear = true; }
-                    if (this._lines && clear)
-                        this.clear(this._lines);
-                    this._lines = paths.map(function (path) {
-                        var line = new google.maps.Polyline({
-                            path: path,
-                            strokeColor: '#FF0000',
-                            strokeOpacity: 1.0,
-                            strokeWeight: 2
-                        });
-                        line.setMap(_this._map);
-                        return line;
-                    });
                 };
                 MapService.prototype.animateMarker = function (marker, coords, time) {
                     if (time === void 0) { time = 5000; }
@@ -71,21 +107,6 @@ System.register(['angular2/core'], function(exports_1) {
                         }
                     }, 20);
                 };
-                MapService.prototype.updateMarker = function (newPosition) {
-                    var _this = this;
-                    if (this._buses) {
-                        console.log('updating bus locations...');
-                        this._buses.map(function (bus, idx) {
-                            if (newPosition.length === _this._buses.length && bus.id === newPosition[idx].id) {
-                                _this.animateMarker(bus.marker, newPosition[idx], 5000);
-                                bus.marker.setIcon(_this.iconOption(newPosition[idx]));
-                            }
-                            else {
-                                _this.setMarker(newPosition[idx]);
-                            }
-                        });
-                    }
-                };
                 MapService.prototype.iconOption = function (option) {
                     return {
                         path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
@@ -95,22 +116,13 @@ System.register(['angular2/core'], function(exports_1) {
                         rotation: option.heading
                     };
                 };
-                MapService.prototype.setMarker = function (buses) {
-                    var _this = this;
-                    if (this._buses)
-                        this.clearBuses(this._buses);
-                    console.log('first time drawing buses for new route:');
-                    this._buses = buses.map(function (bus) {
-                        var marker = new google.maps.Marker({
-                            position: { lat: bus.lat, lng: bus.lng },
-                            icon: _this.iconOption(bus),
-                            map: _this._map
-                        });
-                        return {
-                            id: bus.id,
-                            marker: marker
-                        };
-                    });
+                MapService.prototype.addToBound = function (coord) {
+                    var c = new google.maps.LatLng(coord.lat, coord.lng);
+                    this._bound.extend(c);
+                };
+                MapService.prototype.zoom = function () {
+                    this._map.fitBounds(this._bound);
+                    this._map.panToBounds(this._bound);
                 };
                 MapService.prototype.loadMap = function (mapName) {
                     var _this = this;
@@ -130,6 +142,35 @@ System.register(['angular2/core'], function(exports_1) {
                         },
                         zoom: 13
                     });
+                    this._bound = new google.maps.LatLngBounds();
+                    this.setCurrentLocation();
+                };
+                MapService.prototype.setCurrentLocation = function () {
+                    var _this = this;
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            var pos = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            };
+                            _this._map.setCenter(pos);
+                            var marker = new google.maps.Marker({
+                                position: pos,
+                                icon: {
+                                    path: google.maps.SymbolPath.CIRCLE,
+                                    scale: 5,
+                                    strokeWeight: 1,
+                                    fillColor: '#F00',
+                                    fillOpacity: 1,
+                                    strokeColor: '#00F'
+                                },
+                                map: _this._map
+                            });
+                        });
+                    }
+                    else {
+                        alert('sorry, your browser does not support html5 geolocation');
+                    }
                 };
                 MapService = __decorate([
                     core_1.Injectable(), 

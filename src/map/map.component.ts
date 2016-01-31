@@ -7,6 +7,8 @@ import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/repeat';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/delay';
+import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/observable/interval';
 
 declare var google;
@@ -59,6 +61,9 @@ export class MapComponent implements OnInit, OnChanges{
     );
   }
   updateBusLocation(){
+    // Rx.Observable
+      // .interval(10000)
+      // .mergeMap(x => this.busLocationsStream)
     this.busLocations = this.busLocationsStream
       .delay(10000)
       .repeat()

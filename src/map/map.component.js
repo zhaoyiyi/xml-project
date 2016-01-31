@@ -1,4 +1,4 @@
-System.register(['angular2/core', './map.service', 'rxjs/add/operator/distinctUntilChanged', 'rxjs/add/operator/repeat', 'rxjs/add/operator/debounceTime', 'rxjs/add/operator/delay', 'rxjs/add/observable/interval'], function(exports_1) {
+System.register(['angular2/core', './map.service', 'rxjs/add/operator/distinctUntilChanged', 'rxjs/add/operator/repeat', 'rxjs/add/operator/debounceTime', 'rxjs/add/operator/delay', 'rxjs/add/operator/switchMap', 'rxjs/add/operator/mergeMap', 'rxjs/add/observable/interval'], function(exports_1) {
     "use strict";
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -23,7 +23,9 @@ System.register(['angular2/core', './map.service', 'rxjs/add/operator/distinctUn
             function (_2) {},
             function (_3) {},
             function (_4) {},
-            function (_5) {}],
+            function (_5) {},
+            function (_6) {},
+            function (_7) {}],
         execute: function() {
             MapComponent = (function () {
                 function MapComponent(_mapService) {

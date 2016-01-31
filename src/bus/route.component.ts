@@ -25,14 +25,15 @@ export class RouteComponent implements OnInit{
 
   constructor(private _routeService: RouteService){
     // output route coords and bus locations
-    this.routeControl.valueChanges.subscribe(
-      routeNum => {
-        console.log('selected route: ', routeNum);
-        this.emitRouteInfo(routeNum); // emit route observable
-        this.emitBusLocations(routeNum);
-      },
-      err => console.log( 'err in route component when emitting',err )
-    )
+    this.routeControl.valueChanges
+      .subscribe(
+        routeNum => {
+          console.log('selected route: ', routeNum);
+          this.emitRouteInfo(routeNum); // emit route observable
+          this.emitBusLocations(routeNum);
+        },
+        err => console.log( 'err in route component when emitting',err )
+      )
   }
 
   ngOnInit(){

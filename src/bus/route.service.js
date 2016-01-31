@@ -1,4 +1,4 @@
-System.register(['angular2/core', 'angular2/http', 'rxjs/add/operator/map'], function(exports_1) {
+System.register(['angular2/core', 'angular2/http', 'rxjs/add/operator/map', 'rxjs/add/operator/mergeMap'], function(exports_1) {
     "use strict";
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
         var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -19,7 +19,8 @@ System.register(['angular2/core', 'angular2/http', 'rxjs/add/operator/map'], fun
             function (http_1_1) {
                 http_1 = http_1_1;
             },
-            function (_1) {}],
+            function (_1) {},
+            function (_2) {}],
         execute: function() {
             URL = "http://webservices.nextbus.com/service/publicXMLFeed?a=ttc";
             RouteService = (function () {
@@ -27,9 +28,9 @@ System.register(['angular2/core', 'angular2/http', 'rxjs/add/operator/map'], fun
                     this._http = _http;
                 }
                 RouteService.prototype.getBusLocations = function (num) {
+                    var _this = this;
                     return this.query('vehicleLocations', "r=" + num, "t=2").map(function (res) {
-                        var buses = jQuery.parseXML(res.text()).querySelectorAll('vehicle');
-                        return jQuery.makeArray(buses).map(function (bus) {
+                        return _this.attrArray(res, 'vehicle').map(function (bus) {
                             return {
                                 id: +bus.getAttribute('id'),
                                 routeTag: bus.getAttribute('routeTag'),
@@ -42,10 +43,9 @@ System.register(['angular2/core', 'angular2/http', 'rxjs/add/operator/map'], fun
                     });
                 };
                 RouteService.prototype.getRouteList = function () {
-                    return this.query('routeList')
-                        .map(function (res) {
-                        var routes = jQuery.parseXML(res.text()).querySelectorAll('route');
-                        return jQuery.makeArray(routes).map(function (route) {
+                    var _this = this;
+                    return this.query('routeList').map(function (routes) {
+                        return _this.attrArray(routes, 'route').map(function (route) {
                             return {
                                 tag: route.getAttribute('tag'),
                                 title: route.getAttribute('title')
@@ -53,16 +53,11 @@ System.register(['angular2/core', 'angular2/http', 'rxjs/add/operator/map'], fun
                         });
                     });
                 };
-                RouteService.prototype.getAttr = function (XMLObj, tagNames) {
-                    var i = 0;
-                    var tag = XMLObj.querySelectorAll(tagNames[i]);
-                };
                 RouteService.prototype.getRoute = function (num) {
-                    return this.query('routeConfig', "r=" + num)
-                        .map(function (res) {
-                        var paths = jQuery.parseXML(res.text()).querySelectorAll('path');
-                        var coords = jQuery.makeArray(paths).map(function (path) {
-                            return jQuery.makeArray(path.querySelectorAll('point')).map(function (point) {
+                    var _this = this;
+                    return this.query('routeConfig', "r=" + num).map(function (routes) {
+                        var coords = _this.attrArray(routes, 'path').map(function (path) {
+                            return _this.attrArray(path, 'point').map(function (point) {
                                 return {
                                     lat: +point.getAttribute('lat'),
                                     lng: +point.getAttribute('lon')
@@ -72,12 +67,17 @@ System.register(['angular2/core', 'angular2/http', 'rxjs/add/operator/map'], fun
                         return { id: num, coords: coords };
                     });
                 };
+                RouteService.prototype.attrArray = function (xmlObj, attrName) {
+                    var xmlNodes = xmlObj.querySelectorAll(attrName);
+                    return jQuery.makeArray(xmlNodes);
+                };
                 RouteService.prototype.query = function (cmd) {
                     var options = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         options[_i - 1] = arguments[_i];
                     }
-                    return this._http.get((URL + "&command=" + cmd + "&") + options.join('&'));
+                    return this._http.get((URL + "&command=" + cmd + "&") + options.join('&'))
+                        .map(function (res) { return jQuery.parseXML(res.text()); });
                 };
                 RouteService = __decorate([
                     core_1.Injectable(), 

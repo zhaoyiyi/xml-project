@@ -33,7 +33,8 @@ System.register(['angular2/core', 'angular2/http', 'angular2/common', './route.s
                     this.routeControl = new common_1.Control('');
                     this.routeChange = new core_1.EventEmitter();
                     this.locationChange = new core_1.EventEmitter();
-                    this.routeControl.valueChanges.subscribe(function (routeNum) {
+                    this.routeControl.valueChanges
+                        .subscribe(function (routeNum) {
                         console.log('selected route: ', routeNum);
                         _this.emitRouteInfo(routeNum);
                         _this.emitBusLocations(routeNum);
