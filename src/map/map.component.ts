@@ -10,61 +10,59 @@ import 'rxjs/add/operator/delay';
 import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/observable/interval';
+import 'rxjs/add/operator/pluck';
+
 
 declare var google;
 @Component({
   selector: 'map',
-  template:`
+  template: `
     <div id="map"></div>
   `,
   providers: [MapService],
-  inputs: ['routeInfoStream', 'busLocationsStream']
+  inputs: ['routeInfoStream']
 })
-export class MapComponent implements OnInit, OnChanges{
+export class MapComponent implements OnInit, OnChanges {
 
-  routeInfo: any;
-  routeInfoStream: Observable<any>;
-  busLocations: Subscription;
-  busLocationsStream: Observable<any>;
-  mapName: string = '#map';
+  public routeInfoStream: Observable<any>;
+  public busLocations: Subscription;
 
   constructor(private _mapService: MapService) { }
 
-  ngOnInit(){
+  public ngOnInit() {
     this._mapService.loadMap('#map');
   }
-  ngOnChanges(){
-    if(this._mapService.isInitialized){
+  public ngOnChanges() {
+    if (this._mapService.isInitialized) {
       this.updateRoute();
-    }
-    if(this.busLocationsStream) {
-      this.drawBuses();
+      this.initBuses();
     }
   }
 
-  updateRoute(){
-    this.routeInfoStream.
-    distinctUntilChanged( (a, b) => a.id === b.id )
+  public updateRoute() {
+    this.routeInfoStream
+      .pluck('routeInfo')
+      .distinctUntilChanged( (a, b) => a.id === b.id )
       .subscribe(data => this._mapService.drawPath(data.coords));
   }
 
-  drawBuses(){
+  public initBuses() {
     // unsubscribe the old stream before subscribe the new one
-    if(this.busLocations) this.busLocations.unsubscribe();
+    if (this.busLocations) this.busLocations.unsubscribe();
 
-    this.busLocations = this.busLocationsStream.subscribe(
-      data => {
-        this._mapService.setMarker(data)
-      },
-      err => console.log(err),
-      () => this.updateBusLocation()
-    );
+    this.busLocations = this.routeInfoStream
+      .pluck('busLocation')
+      .subscribe(
+        data => {
+          this._mapService.setMarker(data);
+        },
+        err => console.log(err),
+        () => this.updateBusLocation()
+      );
   }
-  updateBusLocation(){
-    // Rx.Observable
-      // .interval(10000)
-      // .mergeMap(x => this.busLocationsStream)
-    this.busLocations = this.busLocationsStream
+  public updateBusLocation() {
+    this.busLocations = this.routeInfoStream
+      .pluck('busLocation')
       .delay(10000)
       .repeat()
       .subscribe(

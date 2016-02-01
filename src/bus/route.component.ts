@@ -1,6 +1,10 @@
 import {Component, OnInit, EventEmitter} from 'angular2/core';
 import {HTTP_PROVIDERS} from 'angular2/http';
 import {Control} from 'angular2/common';
+import * as Rx from 'rxjs/Rx';
+import {Observable} from 'rxjs';
+import 'rxjs/add/operator/combineLatest';
+
 
 import {RouteService} from './route.service';
 
@@ -13,50 +17,48 @@ import {RouteService} from './route.service';
       <option *ngFor="#route of routes" [value]="route.tag">{{route.title}}</option>
     </select>
   `,
-  providers: [HTTP_PROVIDERS, RouteService],
-  outputs: ['routeChange', 'locationChange']
+  outputs: ['routeChange', 'locationChange'],
+  providers: [HTTP_PROVIDERS, RouteService]
 })
-export class RouteComponent implements OnInit{
-  routes: any;
-  routeControl: Control = new Control('');
-  routeChange = new EventEmitter();
-  locationChange = new EventEmitter();
-  autoUpdate: any;
+export class RouteComponent implements OnInit {
+  public routes: any;
+  public routeControl: Control = new Control('');
+  public routeChange = new EventEmitter();
+  public locationChange = new EventEmitter();
+  public autoUpdate: any;
 
-  constructor(private _routeService: RouteService){
+  constructor(private _routeService: RouteService) {
     // output route coords and bus locations
-    this.routeControl.valueChanges
-      .subscribe(
-        routeNum => {
-          console.log('selected route: ', routeNum);
-          this.emitRouteInfo(routeNum); // emit route observable
-          this.emitBusLocations(routeNum);
-        },
-        err => console.log( 'err in route component when emitting',err )
-      )
+    this.routeControl.valueChanges.subscribe(
+      routeNum => {
+        console.log('selected route: ', routeNum);
+        console.log('emitting route info...');
+        this.routeChange.emit( this.combineStreams(routeNum) );
+      },
+      err => console.log( 'err in route component when emitting', err )
+    );
   }
 
-  ngOnInit(){
+  public ngOnInit() {
     this.getRouteList();
-
   }
-
-  getRouteList(){
-    this._routeService.getRouteList()
-      .subscribe(
-          data => this.routes = data,
-          err => console.log(err),
-          () => console.log('finish loading route list')
-        );
+  public getRouteList() {
+    this._routeService.getRouteList().subscribe(
+      data => this.routes = data,
+      err => console.log(err),
+      () => console.log('finish loading route list')
+    );
   }
-
-  // return observable
-  emitRouteInfo(routeNum){
-    console.log('emitting route info...')
-    this.routeChange.emit( this._routeService.getRoute(routeNum) );
-  }
-  emitBusLocations(routeNum){
-    console.log('emitting bus locations...');
-    this.locationChange.emit( this._routeService.getBusLocations(routeNum) );
+  public combineStreams(routeNum): Observable<any> {
+    return Rx.Observable.combineLatest(
+      this._routeService.getRoute(routeNum), // route info with coords
+      this._routeService.getBusLocations(routeNum), // bus locations
+      (route$, bus$) => {
+        return {
+          busLocation: bus$,
+          routeInfo: route$
+        };
+      }
+    );
   }
 }

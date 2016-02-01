@@ -21,7 +21,7 @@
         "!node_modules/**",
         "!jspm_packages/**"
     ],
-    "compileOnSave": true,
+    "compileOnSave": false,
     "buildOnSave": false,
     "files": [
         "src/app.ts",

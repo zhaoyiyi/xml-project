@@ -3,19 +3,19 @@ declare var google;
 declare var GeolocationMarker;
 
 @Injectable()
-export class MapService{
+export class MapService {
   private _map: any;
   private _bound: any;
   private _lines: any;
   private _buses: any;
 
-  get isInitialized() {return !!this._map}
+  get isInitialized() { return !!this._map; }
 
   // option to clean other lines before drawing
-  drawPath(paths, clear=true){
-    if(this._lines && clear) this.clear(this._lines);
+  public drawPath(paths, clear = true) {
+    if (this._lines && clear) this.clear(this._lines);
     // clears bounds
-    if(this._bound) this._bound = new google.maps.LatLngBounds();
+    if (this._bound) this._bound = new google.maps.LatLngBounds();
     this._lines = paths.map( path => {
       let line = new google.maps.Polyline({
         path: path,
@@ -31,23 +31,23 @@ export class MapService{
     });
 
   }
-  // TODO:20 need better way to update buses on the Map
+  // TODO:0 need better way to update buses on the Map
   // ie, add and delete without refreshing
-  updateMarker(newPosition){
-    if(this._buses && newPosition.length === this._buses.length ){
+  public updateMarker(newPosition) {
+    if (this._buses && newPosition.length === this._buses.length ) {
       console.log('updating bus locations...');
       this._buses.map( (bus, idx) => {
-        if(bus.id === newPosition[idx].id){
+        if (newPosition[idx] && bus.id === newPosition[idx].id ) {
           this.animateMarker(bus.marker, newPosition[idx], 8000);
           bus.marker.setIcon( this.iconOption(newPosition[idx]) );
         }
       });
-    }else{
+    }else {
       this.setMarker(newPosition);
     }
   }
-  setMarker(buses){
-    if(this._buses) this.clearBuses(this._buses);
+  public setMarker(buses) {
+    if (this._buses) this.clearBuses(this._buses);
     console.log('first time drawing buses for new route:');
     this._buses = buses.map( bus => {
       let marker = new google.maps.Marker({
@@ -60,21 +60,32 @@ export class MapService{
         marker: marker
       };
     });
+  }
+  // init //
+  public loadMap(mapName) {
+    let script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.async = true;
+    script.defer = true;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAlWFKOQSQvQx2Xr9qw7i8siK7ktQlGcco&callback=initMap`;
+    document.body.appendChild(script);
 
+    // attach initMap to window
+    (window)['initMap'] = () => this.initMap(mapName);
   }
   // clears stored info on the map.
-  private clear(obj){
-    if(obj){
+  private clear(obj) {
+    if (obj) {
       obj.map( line => line.setMap(null));
     }
   }
-  private clearBuses(buses){
-    if(buses){
+  private clearBuses(buses) {
+    if (buses) {
       buses.map( bus => bus.marker.setMap(null));
     }
   }
 
-  private animateMarker(marker, coords, time=5000){
+  private animateMarker(marker, coords, time = 5000) {
     let lat = marker.getPosition().lat();
     let lng = marker.getPosition().lng();
     let latDiff = coords.lat - lat;
@@ -83,9 +94,9 @@ export class MapService{
     let i = 0;
 
     let animation = setInterval( () => {
-      if(i >= stepNum ) {
+      if (i >= stepNum ) {
         clearInterval(animation);
-      }else{
+      }else {
         lat += latDiff / stepNum;
         lng += lngDiff / stepNum;
         marker.setPosition({lat: lat, lng: lng});
@@ -93,37 +104,24 @@ export class MapService{
       }
     }, 20);
   }
-  private iconOption(option){
+  private iconOption(option) {
     return {
       path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
       scale: 5,
       strokeWeight: 2,
       strokeColor: '#00F',
       rotation: option.heading
-    }
+    };
   }
-  private addToBound(coord){
+  private addToBound(coord) {
     let c = new google.maps.LatLng( coord.lat, coord.lng );
     this._bound.extend(c);
 
 
   }
-  private zoom(){
+  private zoom() {
     this._map.fitBounds(this._bound);
     this._map.panToBounds(this._bound);
-  }
-
-  // init //
-  loadMap(mapName){
-    let script = document.createElement('script');
-    script.type = 'text/javascript'
-    script.async = true;
-    script.defer = true;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAlWFKOQSQvQx2Xr9qw7i8siK7ktQlGcco&callback=initMap`;
-    document.body.appendChild(script);
-
-    // attach initMap to window
-    (window)['initMap'] = () => this.initMap(mapName);
   }
 
   private initMap(mapName) {
@@ -137,7 +135,7 @@ export class MapService{
     this._bound = new google.maps.LatLngBounds();
     this.setCurrentLocation();
   }
-  private setCurrentLocation(){
+  private setCurrentLocation() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition( position => {
         let pos = {
