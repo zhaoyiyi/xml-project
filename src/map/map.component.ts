@@ -20,11 +20,13 @@ declare var google;
     <div id="map"></div>
   `,
   providers: [MapService],
-  inputs: ['routeInfoStream']
+  inputs: ['routeInfoStream', 'locationStream', 'testStream']
 })
 export class MapComponent implements OnInit, OnChanges {
 
   public routeInfoStream: Observable<any>;
+  public locationStream: Observable<any>;
+  public testStream: Observable<any>;
   public busLocations: Subscription;
 
   constructor(private _mapService: MapService) { }
@@ -34,35 +36,49 @@ export class MapComponent implements OnInit, OnChanges {
   }
   public ngOnChanges() {
     if (this._mapService.isInitialized) {
-      this.updateRoute();
+      // this.updateRoute();
+    }
+    if ( this.locationStream ) {
       this.initBuses();
     }
+    if ( this.testStream ) {
+      this.test();
+    }
+  }
+
+  public test() {
+    this.testStream.subscribe(data => {
+      this._mapService.testDrawPath(data);
+    });
   }
 
   public updateRoute() {
     this.routeInfoStream
-      .pluck('routeInfo')
       .distinctUntilChanged( (a, b) => a.id === b.id )
-      .subscribe(data => this._mapService.drawPath(data.coords));
+      .subscribe(
+        data => {
+          console.log('drawing path');
+          this._mapService.drawPath(data.coords);
+          this._mapService.drawStops(data.stops);
+        }
+      );
   }
 
   public initBuses() {
     // unsubscribe the old stream before subscribe the new one
     if (this.busLocations) this.busLocations.unsubscribe();
 
-    this.busLocations = this.routeInfoStream
-      .pluck('busLocation')
+    this.busLocations = this.locationStream
       .subscribe(
         data => {
-          this._mapService.setMarker(data);
+          this._mapService.drawBuses(data);
         },
         err => console.log(err),
         () => this.updateBusLocation()
       );
   }
   public updateBusLocation() {
-    this.busLocations = this.routeInfoStream
-      .pluck('busLocation')
+    this.busLocations = this.locationStream
       .delay(10000)
       .repeat()
       .subscribe(

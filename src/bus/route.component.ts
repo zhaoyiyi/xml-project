@@ -17,7 +17,7 @@ import {RouteService} from './route.service';
       <option *ngFor="#route of routes" [value]="route.tag">{{route.title}}</option>
     </select>
   `,
-  outputs: ['routeChange', 'locationChange'],
+  outputs: ['routeChange', 'locationChange', 'testChange'],
   providers: [HTTP_PROVIDERS, RouteService]
 })
 export class RouteComponent implements OnInit {
@@ -25,6 +25,7 @@ export class RouteComponent implements OnInit {
   public routeControl: Control = new Control('');
   public routeChange = new EventEmitter();
   public locationChange = new EventEmitter();
+  public testChange = new EventEmitter();
   public autoUpdate: any;
 
   constructor(private _routeService: RouteService) {
@@ -33,7 +34,12 @@ export class RouteComponent implements OnInit {
       routeNum => {
         console.log('selected route: ', routeNum);
         console.log('emitting route info...');
-        this.routeChange.emit( this.combineStreams(routeNum) );
+        this.routeChange.emit( this._routeService.getRoute(routeNum) );
+        console.log('emitting bus locations...');
+        this.locationChange.emit( this._routeService.getBusLocations(routeNum));
+        // test here
+        console.log('>>>emitting test info');
+        this.testChange.emit( this._routeService.testPath(routeNum) );
       },
       err => console.log( 'err in route component when emitting', err )
     );
@@ -49,7 +55,8 @@ export class RouteComponent implements OnInit {
       () => console.log('finish loading route list')
     );
   }
-  public combineStreams(routeNum): Observable<any> {
+/*  public combineStreams(routeNum): Observable<any> {
+    // return Rx.Observable.
     return Rx.Observable.combineLatest(
       this._routeService.getRoute(routeNum), // route info with coords
       this._routeService.getBusLocations(routeNum), // bus locations
@@ -60,5 +67,5 @@ export class RouteComponent implements OnInit {
         };
       }
     );
-  }
+  }*/
 }
