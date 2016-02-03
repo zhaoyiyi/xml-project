@@ -1,10 +1,7 @@
-import {Injectable} from 'angular2/core';
+import {Injectable, Inject} from 'angular2/core';
 import * as Rx from 'rxjs/Rx';
-
+import {ICONSET} from './icon';
 declare var google;
-declare var GeolocationMarker;
-
-
 
 @Injectable()
 export class MapService {
@@ -17,34 +14,26 @@ export class MapService {
 
   get isInitialized() { return !!this._map; }
 
+  constructor() {}
+
   // option to clean other lines before drawing
   public drawPath(routeInfo, clear = true) {
     if (this._lines && clear) this.clear(this._lines);
     // clears bounds
     if (this._bound) this._bound = new google.maps.LatLngBounds();
     this._lines = routeInfo.map( path => {
-      let line = new google.maps.Polyline({
-        path: path,
-        strokeColor: '#FF0000',
-        strokeOpacity: 1.0,
-        strokeWeight: 2
-      });
+      let line = new google.maps.Polyline(ICONSET.line(path));
       line.setMap(this._map);
       path.map( point => this.addToBound(point) );
       this.zoom();
       return line;
     });
   }
-  public clearPath(){
+  public clearPath() {
     if (this._linesTest) this.clear(this._linesTest);
   }
   public testDrawPath(path) {
-    let line = new google.maps.Polyline({
-      path: path,
-      strokeColor: '#FF0000',
-      strokeOpacity: 1.0,
-      strokeWeight: 2
-    });
+    let line = new google.maps.Polyline(ICONSET.line(path));
     line.setMap(this._map);
     this._linesTest.push(line);
   }
@@ -56,7 +45,7 @@ export class MapService {
       this._buses.map( (bus, idx) => {
         if ( newPosition[idx] && bus.id === newPosition[idx].id ) {
           this.animateMarker(bus.marker, newPosition[idx], 8000);
-          bus.marker.setIcon( this.icons(newPosition[idx]).bus );
+          bus.marker.setIcon( ICONSET.bus(google.maps.SymbolPath.FORWARD_CLOSED_ARROW, newPosition[idx]) );
         }
       });
     }else {
@@ -68,7 +57,7 @@ export class MapService {
     console.log('first time drawing buses for new route:');
     this._buses = buses.map( bus => {
       if (bus && bus.id) {
-        return this.addMarker(bus, this.icons(bus).bus);
+        return this.addMarker(bus, ICONSET.bus(google.maps.SymbolPath.FORWARD_CLOSED_ARROW, bus));
       }
     });
   }
@@ -77,7 +66,7 @@ export class MapService {
   public drawStops(stops) {
     if (this._stops) this.clearMarker(this._stops);
     this._stops = stops.map( stop => {
-      return this.addMarker(stop, this.icons().stop);
+      return this.addMarker(stop, ICONSET.stop(google.maps.SymbolPath.CIRCLE));
     });
   }
   // init //
@@ -101,25 +90,6 @@ export class MapService {
     return {
       id: info.id,
       marker: marker
-    };
-  }
-  private icons(option?) {
-    return {
-      stop: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 2,
-        strokeWeight: 1,
-        fillColor: '#04C8EF',
-        fillOpacity: 1,
-        strokeColor: '#00F'
-      },
-      bus: {
-        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-        scale: 5,
-        strokeWeight: 2,
-        strokeColor: '#00F',
-        rotation: option ? option.heading : 0
-      }
     };
   }
   // clears stored info on the map.
@@ -163,10 +133,7 @@ export class MapService {
   }
   private initMap(mapName) {
     this._map = new google.maps.Map(document.querySelector(mapName), {
-     center: {
-       lat: 43.646389,
-       lng: -79.408959
-     },
+     center: { lat: 43.646389, lng: -79.408959 },
      zoom: 13
     });
     this._bound = new google.maps.LatLngBounds();
@@ -180,29 +147,14 @@ export class MapService {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
-
         this._map.setCenter(pos);
-
         let marker = new google.maps.Marker({
           position: pos,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 5,
-            strokeWeight: 1,
-            fillColor: '#F00',
-            fillOpacity: 1,
-            strokeColor: '#00F'
-          },
+          icon: ICONSET.me(google.maps.SymbolPath.CIRCLE),
           map: this._map
         });
         console.log('get current location');
-      }, (err) => {
-        let msg = 'failed to get current location';
-        if (err.code === 1) msg += ', PERMISSION_DENIED';
-        if (err.code === 2) msg += ', POSITION_UNAVAILABLE';
-        if (err.code === 3) msg += ', TIMEOUT';
-        console.log(msg);
-      });
+      }, (err) => console.log('failed to get current location', err));
     } else {
       // Browser doesn't support Geolocation
       alert('sorry, your browser does not support html5 geolocation');

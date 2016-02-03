@@ -1,6 +1,7 @@
 import {Component, OnInit, OnChanges} from 'angular2/core';
 import {MapService} from './map.service';
 
+
 import {Observable, Subscription} from 'rxjs';
 import * as Rx from 'rxjs/Rx';
 import 'rxjs/add/operator/distinctUntilChanged';
@@ -36,13 +37,13 @@ export class MapComponent implements OnInit, OnChanges {
   }
   public ngOnChanges() {
     if (this._mapService.isInitialized) {
-      // this.updateRoute();
+      this.updateRoute();
     }
     if ( this.locationStream ) {
       this.initBuses();
     }
     if ( this.testStream ) {
-      this.test();
+      // this.test();
     }
   }
 
