@@ -1,6 +1,4 @@
-/.imdone
-/project.iml
+project.iml
 node_modules
 .imdone/
 jspm_packages/
-/node_modules

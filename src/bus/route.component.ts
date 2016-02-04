@@ -26,8 +26,6 @@ export class RouteComponent implements OnInit {
   public routeChange = new EventEmitter();
   public locationChange = new EventEmitter();
   public testChange = new EventEmitter();
-  public autoUpdate: any;
-
   constructor(private _routeService: RouteService) {
     // output route coords and bus locations
     this.routeControl.valueChanges.subscribe(

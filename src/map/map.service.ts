@@ -16,6 +16,16 @@ export class MapService {
 
   constructor() {}
 
+  // test
+  public clearPath() {
+    if (this._linesTest) this.clear(this._linesTest);
+  }
+  public testDrawPath(path) {
+    let line = new google.maps.Polyline(ICONSET.line(path));
+    line.setMap(this._map);
+    this._linesTest.push(line);
+  }
+
   // option to clean other lines before drawing
   public drawPath(routeInfo, clear = true) {
     if (this._lines && clear) this.clear(this._lines);
@@ -29,14 +39,7 @@ export class MapService {
       return line;
     });
   }
-  public clearPath() {
-    if (this._linesTest) this.clear(this._linesTest);
-  }
-  public testDrawPath(path) {
-    let line = new google.maps.Polyline(ICONSET.line(path));
-    line.setMap(this._map);
-    this._linesTest.push(line);
-  }
+
   // TODO:0 need better way to update buses on the Map
   // ie, add and delete without refreshing
   public updateMarker(newPosition) {
