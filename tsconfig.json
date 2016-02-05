@@ -23,15 +23,9 @@
     ],
     "compileOnSave": false,
     "buildOnSave": false,
-    "files": [
-        "src/app.ts",
-        "src/boot.ts",
-        "src/bus/route.component.ts",
-        "src/bus/route.service.ts",
-        "src/map/icon.ts",
-        "src/map/map.component.ts",
-        "src/map/map.service.ts",
-        "typings/jquery/jquery.d.ts"
+    "exclude": [
+        "node_modules",
+        "jspm_packages"
     ],
     "atom": {
         "rewriteTsconfig": true
