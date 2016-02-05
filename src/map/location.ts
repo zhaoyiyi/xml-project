@@ -1,18 +1,18 @@
-export function getCurrentLocation(callback) {
+import * as Rx from 'rxjs/Rx';
+import {Observable} from 'rxjs/Observable';
+// TODO: make only one location request
+export function getCurrentLocation(): Observable {
   if (navigator.geolocation) {
-    console.log('locating...');
-    navigator.geolocation.getCurrentPosition(position => {
-      let pos = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
-      callback(pos);
-      console.log('get current location');
-
-      return pos;
-    }, (err) => console.log('failed to get current location', err));
-  } else {
-    // Browser doesn't support Geolocation
-    alert('sorry, your browser does not support html5 geolocation');
+    return Rx.Observable.create((observer) => {
+      navigator.geolocation.getCurrentPosition(position => {
+        console.log('getting current location...');
+        let pos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        observer.next(pos);
+        observer.complete();
+      });
+    });
   }
 }

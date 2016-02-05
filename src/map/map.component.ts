@@ -19,6 +19,7 @@ declare var google;
   selector: 'map',
   template: `
     <div id="map"></div>
+    <p>Current location: </p>
   `,
   providers: [MapService],
   inputs: ['routeInfoStream', 'locationStream', 'testStream']
@@ -34,6 +35,7 @@ export class MapComponent implements OnInit, OnChanges {
 
   public ngOnInit() {
     this._mapService.loadMap('#map');
+    this._mapService.currentLocation.subscribe(data => console.log('data from map component', data));
   }
   public ngOnChanges() {
     if (this._mapService.isInitialized) {
@@ -46,37 +48,31 @@ export class MapComponent implements OnInit, OnChanges {
       // this.test();
     }
   }
-
   public test() {
     this.testStream.subscribe(data => {
       this._mapService.testDrawPath(data);
     });
   }
-
   public updateRoute() {
     this.routeInfoStream
       .distinctUntilChanged( (a, b) => a.id === b.id )
-      .subscribe(
-        data => {
-          console.log('drawing path');
-          this._mapService.drawPath(data.coords);
-          this._mapService.drawStops(data.stops);
-        }
-      );
+      .subscribe( data => {
+        console.log('drawing path');
+        this._mapService.drawPath(data.coords);
+        this._mapService.drawStops(data.stops);
+      });
   }
-
   public initBuses() {
     // unsubscribe the old stream before subscribe the new one
     if (this.busLocations) this.busLocations.unsubscribe();
 
     this.busLocations = this.locationStream
-      .subscribe(
-        data => {
-          this._mapService.drawBuses(data);
-        },
-        err => console.log(err),
-        () => this.updateBusLocation()
-      );
+      .subscribe( data => {
+        this._mapService.drawBuses(data);
+      },
+      err => console.log(err),
+      () => this.updateBusLocation()
+    );
   }
   public updateBusLocation() {
     this.busLocations = this.locationStream
@@ -88,5 +84,4 @@ export class MapComponent implements OnInit, OnChanges {
         () => console.log('update location finished.')
       );
   }
-
 }// end

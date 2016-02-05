@@ -18,6 +18,7 @@ export class MapService {
   get isInitialized() {
     return !!this._map;
   }
+  get currentLocation() { return getCurrentLocation(); }
 
   constructor() {
   }
@@ -64,7 +65,6 @@ export class MapService {
       this.drawBuses(newPosition);
     }
   }
-
   public drawBuses(buses) {
     if (this._buses) clearMarker(this._buses);
     console.log('first time drawing buses for new route:');
@@ -74,7 +74,6 @@ export class MapService {
       }
     });
   }
-
   // TODO: adjust stop marker size when zoom in and out.
   // TODO: show stop information when clicking on it.
   public drawStops(stops) {
@@ -83,7 +82,6 @@ export class MapService {
       return addMarker(this._map, stop, ICONSET.stop(google.maps.SymbolPath.CIRCLE));
     });
   }
-
   // init //
   public loadMap(mapName) {
     let script = document.createElement('script');
@@ -96,7 +94,6 @@ export class MapService {
     // attach initMap to window
     (window)['initMap'] = () => this.initMap(mapName);
   }
-
   // good
   private initMap(mapName) {
     this._map = new google.maps.Map(document.querySelector(mapName), {
@@ -104,11 +101,14 @@ export class MapService {
       zoom: 13
     });
     this._bound = new google.maps.LatLngBounds();
-    //this.setCurrentLocation();
-    getCurrentLocation( (pos) => {
-      addMarker(this._map, pos, ICONSET.me(google.maps.SymbolPath.CIRCLE));
-      this._currentLocation = pos;
-      this._map.setCenter(this._currentLocation);
-    });
+    getCurrentLocation().subscribe( pos => {
+        addMarker(this._map, pos, ICONSET.me(google.maps.SymbolPath.CIRCLE));
+        this._currentLocation = pos;
+        this._map.setCenter(this._currentLocation);
+      }
+    );
   }
+
 }
+
+
