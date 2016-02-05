@@ -2,3 +2,4 @@ project.iml
 node_modules
 .imdone/
 jspm_packages/
+/typings
