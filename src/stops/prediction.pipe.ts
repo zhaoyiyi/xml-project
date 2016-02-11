@@ -4,6 +4,7 @@ import {Pipe, PipeTransform} from 'angular2/core';
 })
 export class PredictionPipe implements PipeTransform {
   public transform(value) {
+    if (value.length === 0) return;
     if (value.length <= 1) {
       return value.min;
     }else {

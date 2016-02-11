@@ -1,7 +1,7 @@
 import {Http} from 'angular2/http';
 import {Injectable} from 'angular2/core';
 import {Observable} from "rxjs/Observable";
-import {xmlObservable} from './helper';
+import {xmlObservable} from './../bus/helper';
 import * as Rx from 'rxjs/Rx';
 import jquery from 'jquery';
 
@@ -10,7 +10,7 @@ export class StopService {
 
   constructor(private _http: Http) {}
   public findStops(coord): Observable<any> {
-    return this._http.get('stops/stops.json')
+    return this._http.get('src/stops/stops.json')
       .mergeMap(res => res.json())
       .filter( stop => {
         return this.round(stop.lat, coord.lat) && this.round(stop.lng, coord.lng);
