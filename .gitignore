@@ -1,3 +1,6 @@
+project.iml
 node_modules
 .imdone/
 jspm_packages/
+/typings
+/stops/stops.txt
