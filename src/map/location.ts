@@ -1,5 +1,6 @@
 import * as Rx from 'rxjs/Rx';
 import {Observable} from 'rxjs/Observable';
+
 // TODO: make only one location request
 export function getCurrentLocation(): Observable {
   if (navigator.geolocation) {

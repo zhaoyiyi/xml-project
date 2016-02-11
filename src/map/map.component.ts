@@ -1,7 +1,9 @@
 import {Component, OnInit, OnChanges} from 'angular2/core';
+import {HTTP_PROVIDERS} from 'angular2/http';
 import {MapService} from './map.service';
-
-
+import {StopService} from '../bus/stop.service';
+import {PredictionPipe} from '../bus/prediction.pipe';
+import {Sort} from '../bus/sort.pipe';
 import {Observable, Subscription} from 'rxjs';
 import * as Rx from 'rxjs/Rx';
 import 'rxjs/add/operator/distinctUntilChanged';
@@ -19,23 +21,45 @@ declare var google;
   selector: 'map',
   template: `
     <div id="map"></div>
-    <p>Current location: </p>
+    <p>Current location:{{currentLocation | json}} </p>
+    <ul *ngIf="routes">
+      <li *ngFor="#route of routes">
+        <p>{{route.title}}</p>
+        <ul>
+          <li *ngFor="#stop of route.stops">
+            {{stop.stopTitle}}
+            <p *ngFor="#predictions of stop.dir">
+              {{predictions.title}} {{predictions.prediction | prediction}}
+            </p>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <button (click)="showNearbyStops()">show stops</button>
   `,
-  providers: [MapService],
-  inputs: ['routeInfoStream', 'locationStream', 'testStream']
+  providers: [HTTP_PROVIDERS, MapService, StopService],
+  inputs: ['routeInfoStream', 'locationStream', 'testStream'],
+  pipes: [PredictionPipe]
 })
 export class MapComponent implements OnInit, OnChanges {
-
+  public currentLocation: any;
   public routeInfoStream: Observable<any>;
   public locationStream: Observable<any>;
   public testStream: Observable<any>;
   public busLocations: Subscription;
+  public stops: any;
+  public routes: Array = [];
 
-  constructor(private _mapService: MapService) { }
+  constructor(
+      private _mapService: MapService,
+      private _stopService: StopService
+  ) { }
 
   public ngOnInit() {
     this._mapService.loadMap('#map');
-    this._mapService.currentLocation.subscribe(data => console.log('data from map component', data));
+    this._mapService.currentLocation.subscribe(data => {
+      this.currentLocation = data;
+    });
   }
   public ngOnChanges() {
     if (this._mapService.isInitialized) {
@@ -44,14 +68,30 @@ export class MapComponent implements OnInit, OnChanges {
     if ( this.locationStream ) {
       this.initBuses();
     }
-    if ( this.testStream ) {
-      // this.test();
-    }
   }
-  public test() {
-    this.testStream.subscribe(data => {
-      this._mapService.testDrawPath(data);
-    });
+  // Click button, then ask for prediction and draw stops
+  public showNearbyStops() {
+    this._stopService.findStops(this.currentLocation)
+      .subscribe( data => {
+        this.getPrediction(data);
+        this._mapService.drawStops(data);
+      },
+        err => console.log(err)
+      );
+  }
+  public getPrediction(stops) {
+    this.stops = [];
+    let info$ = Rx.Observable.fromArray(stops)
+      .pluck('id')
+      .mergeMap(stopId => this._stopService.getStopInfo(stopId))
+      .share()
+      .groupBy((info) => info.routeTag)
+      .subscribe(d => {
+        d.toArray().map( s => {
+          return {title: s[0].routeTitle, stops: s};
+        })
+        .subscribe(data => this.routes.push(data));
+      });
   }
   public updateRoute() {
     this.routeInfoStream

@@ -53,17 +53,4 @@ export class RouteComponent implements OnInit {
       () => console.log('finish loading route list')
     );
   }
-/*  public combineStreams(routeNum): Observable<any> {
-    // return Rx.Observable.
-    return Rx.Observable.combineLatest(
-      this._routeService.getRoute(routeNum), // route info with coords
-      this._routeService.getBusLocations(routeNum), // bus locations
-      (route$, bus$) => {
-        return {
-          busLocation: bus$,
-          routeInfo: route$
-        };
-      }
-    );
-  }*/
 }

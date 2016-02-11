@@ -44,7 +44,7 @@ export class RouteService {
     );
   }
   // TODO: try make use of observable stream to do map and filter
-public getRoute(num): Observable<any> {
+  public getRoute(num): Observable<any> {
     return this.query( 'routeConfig', `r=${num}`).map( routes => {
       let coords = this.attrArray(routes, 'path').map( path =>
         this.attrArray(path, 'point').map ( point => {

@@ -10,9 +10,9 @@ export class MapService {
   private _map: any;
   private _bound: any;
   private _lines: any;
-  private _linesTest: any = [];
   private _buses: any;
   private _stops: any;
+  private _placeService: any;
   private _currentLocation: any;
 
   get isInitialized() {
@@ -20,19 +20,7 @@ export class MapService {
   }
   get currentLocation() { return getCurrentLocation(); }
 
-  constructor() {
-  }
-
-  // test
-  public clearPath() {
-    if (this._linesTest) clear(this._linesTest);
-  }
-
-  public testDrawPath(path) {
-    let line = new google.maps.Polyline(ICONSET.line(path));
-    line.setMap(this._map);
-    this._linesTest.push(line);
-  }
+  constructor() {}
 
   // option to clean other lines before drawing
   public drawPath(routeInfo, clearPath = true) {
@@ -76,6 +64,7 @@ export class MapService {
   }
   // TODO: adjust stop marker size when zoom in and out.
   // TODO: show stop information when clicking on it.
+  // TODO: use google maps api to get bus stop locations.
   public drawStops(stops) {
     if (this._stops) clearMarker(this._stops);
     this._stops = stops.map(stop => {
@@ -88,27 +77,27 @@ export class MapService {
     script.type = 'text/javascript';
     script.async = true;
     script.defer = true;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAlWFKOQSQvQx2Xr9qw7i8siK7ktQlGcco&callback=initMap`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAlWFKOQSQvQx2Xr9qw7i8siK7ktQlGcco&callback=initMap&libraries=places`;
     document.body.appendChild(script);
-
     // attach initMap to window
     (window)['initMap'] = () => this.initMap(mapName);
   }
-  // good
+  // init callback
   private initMap(mapName) {
     this._map = new google.maps.Map(document.querySelector(mapName), {
       center: {lat: 43.646389, lng: -79.408959},
-      zoom: 13
+      zoom: 15
     });
     this._bound = new google.maps.LatLngBounds();
+    this._placeService = new google.maps.places.PlacesService(this._map);
     getCurrentLocation().subscribe( pos => {
-        addMarker(this._map, pos, ICONSET.me(google.maps.SymbolPath.CIRCLE));
-        this._currentLocation = pos;
-        this._map.setCenter(this._currentLocation);
-      }
-    );
+      addMarker(this._map, pos, ICONSET.me(google.maps.SymbolPath.CIRCLE));
+      // set current location
+      this._currentLocation = pos;
+      // set map center
+      this._map.setCenter(this._currentLocation);
+    });
   }
-
 }
 
 

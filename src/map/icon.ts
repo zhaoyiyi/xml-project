@@ -4,7 +4,7 @@ export const ICONSET = {
   stop: function stop(path) {
     return {
       path: path,
-      scale: 2,
+      scale: 3,
       strokeWeight: 1,
       fillColor: '#04C8EF',
       fillOpacity: 1,
