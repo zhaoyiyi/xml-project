@@ -15,13 +15,13 @@
         "suppressImplicitAnyIndexErrors": true,
         "sourceMap": true
     },
-    "filesGlob": [
-        "**/*.ts",
-        "**/*.tsx",
-        "!node_modules/**",
-        "!jspm_packages/**"
-    ],
-    "compileOnSave": false,
+//    "filesGlob": [
+//        "**/*.ts",
+//        "**/*.tsx",
+//        "!node_modules/**",
+//        "!jspm_packages/**"
+//    ],
+    "compileOnSave": true,
     "buildOnSave": false,
     "exclude": [
         "node_modules",

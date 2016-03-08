@@ -3,6 +3,7 @@ import {Injectable} from 'angular2/core';
 import {Observable} from "rxjs/Observable";
 import {xmlObservable} from './../bus/helper';
 import * as Rx from 'rxjs/Rx';
+import 'rxjs/add/operator/pluck';
 import jquery from 'jquery';
 
 @Injectable()
@@ -17,7 +18,13 @@ export class StopService {
       })
       .toArray();
   }
-  public getStopInfo(stopId): Observable<any> {
+  public getPrediction(stops: Array) {
+    return Rx.Observable.fromArray(stops)
+      .pluck('id')
+      .mergeMap(stopId => this.getStopInfo(stopId))
+      .groupBy((info) => info.routeTag);
+  }
+  private getStopInfo(stopId): Observable<any> {
     return this._http.get(`http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=${stopId}`)
       .map(res => $.parseXML(res.text()))
       .mergeMap(res => xmlObservable('//predictions', res))
@@ -61,6 +68,6 @@ export class StopService {
     let a = Math.abs(num1);
     let b = Math.abs(num2);
     //return Math.floor( +num1 * n ) === Math.floor( +num2 * n);
-    return Math.abs( a - b ) <= 0.0025;
+    return Math.abs( a - b ) <= 0.0035;
   }
 }

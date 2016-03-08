@@ -1,4 +1,4 @@
-import {Component, OnInit, OnChanges} from 'angular2/core';
+import {Component, OnInit, OnChanges, EventEmitter} from 'angular2/core';
 import {HTTP_PROVIDERS} from 'angular2/http';
 import {MapService} from './map.service';
 
@@ -15,7 +15,6 @@ import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/observable/interval';
 import 'rxjs/add/operator/pluck';
-
 
 declare var google;
 @Component({
@@ -49,7 +48,7 @@ export class MapComponent implements OnInit, OnChanges {
   public testStream: Observable<any>;
   public busLocations: Subscription;
   public stops: any;
-  public routes: Array = [];
+  public routes: Array<any> = [];
 
   constructor(private _mapService: MapService,
               private _stopService: StopService) {
@@ -61,7 +60,6 @@ export class MapComponent implements OnInit, OnChanges {
       this.currentLocation = data;
     });
   }
-
   public ngOnChanges() {
     if (this._mapService.isInitialized) {
       this.updateRoute();
@@ -74,29 +72,23 @@ export class MapComponent implements OnInit, OnChanges {
   // Click button, then ask for prediction and draw stops
   public showNearbyStops() {
     this._stopService.findStops(this.currentLocation)
-        .subscribe(data => {
-              this.getPrediction(data);
-              this._mapService.drawStops(data);
-            },
-            err => console.log(err)
-        );
+      .subscribe(data => {
+        this.getPrediction(data);
+        this._mapService.drawStops(data);
+      },
+      err => console.log(err)
+      );
   }
-
-  public getPrediction(stops) {
-    this.stops = [];
-    Rx.Observable.fromArray(stops)
-        .pluck('id')
-        .mergeMap(stopId => this._stopService.getStopInfo(stopId))
-        .share()
-        .groupBy((info) => info.routeTag)
-        .subscribe(d => {
-          d.toArray().map(s => {
-                return {title: s[0].routeTitle, stops: s};
-              })
-              .subscribe(data => this.routes.push(data));
-        });
+  public getPrediction(stops: Array) {
+    this.routes = [];
+    this._stopService.getPrediction(stops)
+      .subscribe(d => {
+        d.toArray().map(s => {
+          return {title: s[0].routeTitle, stops: s};
+        })
+        .subscribe( data => this.routes.push(data) );
+      });
   }
-
   public updateRoute() {
     this.routeInfoStream
         .distinctUntilChanged((a, b) => a.id === b.id)

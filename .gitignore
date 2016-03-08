@@ -3,4 +3,5 @@ node_modules
 .imdone/
 jspm_packages/
 /typings
-/stops/stops.txt
+src/stops/stops.txt
+/.idea
