@@ -4,7 +4,6 @@ import {Observable} from "rxjs/Observable";
 import {xmlObservable} from './../bus/helper';
 import * as Rx from 'rxjs/Rx';
 import 'rxjs/add/operator/pluck';
-import jquery from 'jquery';
 
 @Injectable()
 export class StopService {

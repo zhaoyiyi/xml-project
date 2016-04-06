@@ -89,18 +89,18 @@ export class RouteService {
         return path;
       });
   }
-  public testStop(num): Observable<any> {
-    return this.query( 'routeConfig', `r=${num}`)
-      .mergeMap( route => this.xmlObservable('//route/stop', route) )
-      .map( (stop: HTMLElement) => {
-        return {
-          tag: stop.getAttribute('tag'),
-          title: stop.getAttribute('title'),
-          lat: stop.getAttribute('lat'),
-          lng: stop.getAttribute('lon')
-        };
-      });
-  }
+  // public testStop(num): Observable<any> {
+  //   return this.query( 'routeConfig', `r=${num}`)
+  //     .mergeMap( route => this.xmlObservable('//route/stop', route) )
+  //     .map( (stop: HTMLElement) => {
+  //       return {
+  //         tag: stop.getAttribute('tag'),
+  //         title: stop.getAttribute('title'),
+  //         lat: stop.getAttribute('lat'),
+  //         lng: stop.getAttribute('lon')
+  //       };
+  //     });
+  // }
   private xmlObservable(xpath, contextNode) {
     let nodeList = document.evaluate(xpath, contextNode, null, XPathResult.ANY_TYPE, null);
     return Rx.Observable.create( observer => {
