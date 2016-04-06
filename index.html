@@ -3,9 +3,6 @@
   <head>
     <meta charset="utf-8">
     <title></title>
-    <!-- polyfills -->
-    <!-- <script src="node_modules/es6-shim/es6-shim.min.js"></script> -->
-    <!-- <script src="node_modules/systemjs/dist/system-polyfills.js"></script> -->
     <script src="node_modules/angular2/bundles/angular2-polyfills.js"></script>
     <!-- systemjs -->
     <script src="node_modules/systemjs/dist/system.js"></script>
@@ -14,7 +11,7 @@
     <script src="node_modules/angular2/bundles/http.dev.js"></script>
     <script src="node_modules/angular2/bundles/router.dev.js"></script>
     <!-- TypeScript -->
-    <!-- <script src="node_modules/typescript/lib/typescript.js"></script> -->
+     <script src="node_modules/typescript/lib/typescript.js"></script>
     <!-- Rx -->
     <script src="node_modules/rxjs/bundles/Rx.js"></script>
     <!-- jQuery -->
@@ -33,12 +30,9 @@
             "main": "boot",
             "defaultExtension": "ts"
           }
-        },
-        map: {
-          'typescript': 'https://cdnjs.cloudflare.com/ajax/libs/typescript/1.8.0/typescript.min.js'
         }
       });
-      System.import('src/boot').then(null, console.error.bind(console));
+      System.import('src/boot');
     </script>
 
     <style type="text/css">

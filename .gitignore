@@ -1,7 +1,3 @@
-project.iml
 node_modules
-.imdone/
-jspm_packages/
-/typings
 src/stops/stops.txt
 /.idea
