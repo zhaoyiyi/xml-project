@@ -1,10 +1,7 @@
 import {Component, OnInit, OnChanges, EventEmitter} from 'angular2/core';
 import {HTTP_PROVIDERS} from 'angular2/http';
 import {MapService} from './map.service';
-
-import {StopService} from '../stops/stop.service.ts';
-import {PredictionPipe} from '../stops/prediction.pipe.ts';
-import {NoEmptyArrayPipe} from '../stops/noEmptyArray.pipe';
+import {NearbyStopsComponent} from '../stops/nearbyStops.component.ts';
 import {Observable, Subscription} from 'rxjs';
 import * as Rx from 'rxjs/Rx';
 import 'rxjs/add/operator/distinctUntilChanged';
@@ -21,74 +18,30 @@ declare var google;
   selector: 'map',
   template: `
     <div id="map"></div>
-    <p>Current location:{{currentLocation | json}} </p>
-    <ul *ngIf="routes">
-      <li *ngFor="#route of routes">
-        <p>{{route.title}}</p>
-        <ul>
-          <li *ngFor="#stop of route.stops">
-            {{stop.stopTitle}}
-            <p  *ngFor="#predictions of stop.dir | noEmptyArray">
-              {{predictions.title}} in <span style="color: crimson">{{predictions.prediction | prediction}}</span> min
-            </p>
-          </li>
-        </ul>
-      </li>
-    </ul>
-    <button (click)="showNearbyStops()">show stops</button>
+    <nearby-stops></nearby-stops>
   `,
-  providers: [HTTP_PROVIDERS, MapService, StopService],
+  providers: [HTTP_PROVIDERS, MapService],
   inputs: ['routeInfoStream', 'locationStream', 'testStream'],
-  pipes: [PredictionPipe, NoEmptyArrayPipe]
+  directives: [NearbyStopsComponent]
 })
 export class MapComponent implements OnInit, OnChanges {
-  public currentLocation: any;
-  public routeInfoStream: Observable<any>;
-  public locationStream: Observable<any>;
-  public testStream: Observable<any>;
-  public busLocations: Subscription;
-  public stops: any;
-  public routes: Array<any> = [];
+  public routeInfoStream:Observable<any>;
+  public locationStream:Observable<any>;
+  public testStream:Observable<any>;
+  public busLocations:Subscription;
+  public stops:any;
 
-  constructor(private _mapService: MapService,
-              private _stopService: StopService) {
-  }
+  constructor(private _mapService:MapService) { }
 
   public ngOnInit() {
     this._mapService.loadMap('#map');
-    this._mapService.currentLocation.subscribe(data => {
-      this.currentLocation = data;
-    });
-  }
-  public ngOnChanges() {
-    if (this._mapService.isInitialized) {
-      this.updateRoute();
-    }
-    if (this.locationStream) {
-      this.initBuses();
-    }
   }
 
-  // Click button, then ask for prediction and draw stops
-  public showNearbyStops() {
-    this._stopService.findStops(this.currentLocation)
-      .subscribe(data => {
-        this.getPrediction(data);
-        this._mapService.drawStops(data);
-      },
-      err => console.log(err)
-      );
+  public ngOnChanges() {
+    if (this._mapService.isInitialized) this.updateRoute();
+    if (this.locationStream) this.initBuses();
   }
-  public getPrediction(stops: Array) {
-    this.routes = [];
-    this._stopService.getPrediction(stops)
-      .subscribe(d => {
-        d.toArray().map(s => {
-          return {title: s[0].routeTitle, stops: s};
-        })
-        .subscribe( data => this.routes.push(data) );
-      });
-  }
+
   public updateRoute() {
     this.routeInfoStream
         .distinctUntilChanged((a, b) => a.id === b.id)

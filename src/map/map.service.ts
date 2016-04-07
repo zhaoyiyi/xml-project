@@ -64,7 +64,6 @@ export class MapService {
   }
   // TODO: adjust stop marker size when zoom in and out.
   // TODO: show stop information when clicking on it.
-  // TODO: use google maps api to get bus stop locations.
   public drawStops(stops) {
     if (this._stops) clearMarker(this._stops);
     this._stops = stops.map(stop => {

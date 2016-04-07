@@ -4,56 +4,63 @@ import {Observable} from "rxjs/Observable";
 import {xmlObservable} from './../bus/helper';
 import * as Rx from 'rxjs/Rx';
 import 'rxjs/add/operator/pluck';
+// import * as $ from 'jquery';
 
 @Injectable()
 export class StopService {
 
-  constructor(private _http: Http) {}
-  public findStops(coord): Observable<any> {
+  constructor(private _http:Http) {
+  }
+
+  public findStops(coord):Observable<any> {
     return this._http.get('src/stops/stops.json')
-      .mergeMap(res => res.json())
-      .filter( stop => {
-        return this.round(stop.lat, coord.lat) && this.round(stop.lng, coord.lng);
-      })
-      .toArray();
+        .mergeMap(res => res.json())
+        .filter(stop => {
+          return this.round(stop.lat, coord.lat) && this.round(stop.lng, coord.lng);
+        })
+        .toArray();
   }
-  public getPrediction(stops: Array) {
+
+  public getPrediction(stops:Array) {
     return Rx.Observable.fromArray(stops)
-      .pluck('id')
-      .mergeMap(stopId => this.getStopInfo(stopId))
-      .groupBy((info) => info.routeTag);
+        .pluck('id')
+        .mergeMap(stopId => this.getStopInfo(stopId))
+        .groupBy((info) => info.routeTag);
   }
-  private getStopInfo(stopId): Observable<any> {
+
+  private getStopInfo(stopId):Observable<any> {
     return this._http.get(`http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=${stopId}`)
-      .map(res => $.parseXML(res.text()))
-      .mergeMap(res => xmlObservable('//predictions', res))
-      .mergeMap( p => {
-        return Rx.Observable.create( observer => {
-          observer.next({
-            routeTitle: p.getAttribute('routeTitle'),
-            routeTag: p.getAttribute('routeTag'),
-            stopTitle: p.getAttribute('stopTitle'),
-            dirNoPrediction: p.getAttribute('dirTitleBecauseNoPredictions') || null,
-            // here calls the function
-            dir: this.getDirection(p)
+        .map(res => $.parseXML(res.text()))
+        .mergeMap(res => xmlObservable('//predictions', res))
+        .mergeMap(p => {
+          return Rx.Observable.create(observer => {
+            observer.next({
+              routeTitle: p.getAttribute('routeTitle'),
+              routeTag: p.getAttribute('routeTag'),
+              stopTitle: p.getAttribute('stopTitle'),
+              dirNoPrediction: p.getAttribute('dirTitleBecauseNoPredictions') || null,
+              // here calls the function
+              dir: this.getDirection(p)
+            });
+            observer.complete();
           });
-          observer.complete();
         });
-    });
   }
+
   //
-  private getDirection(predictions: HTMLElement): Array {
+  private getDirection(predictions:HTMLElement):Array {
     let dir = $.makeArray(predictions.children);
-    return dir.map( d => {
+    return dir.map(d => {
       return {
         title: d.getAttribute('title'),
         prediction: this.getDirPrediction(d.children)
       };
     });
   }
-  private getDirPrediction(prediction): Array {
+
+  private getDirPrediction(prediction):Array {
     let dir = $.makeArray(prediction);
-    return dir.map( p => {
+    return dir.map(p => {
       return {
         min: p.getAttribute('minutes'),
         sec: p.getAttribute('seconds'),
@@ -62,11 +69,12 @@ export class StopService {
       };
     });
   }
+
   private round(num1, num2) {
     let n = Math.pow(10, 2);
     let a = Math.abs(num1);
     let b = Math.abs(num2);
     //return Math.floor( +num1 * n ) === Math.floor( +num2 * n);
-    return Math.abs( a - b ) <= 0.0035;
+    return Math.abs(a - b) <= 0.0035;
   }
 }
