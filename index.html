@@ -17,6 +17,10 @@
     <!-- jQuery -->
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
 
+    <!-- ng2 material -->
+    <link rel="stylesheet" href="node_modules/ng2-material/dist/ng2-material.css">
+    <link rel="stylesheet" href="node_modules/ng2-material/dist/font.css">
+
     <script>
       System.config({
         transpiler: "typescript",
@@ -29,7 +33,13 @@
           "src": {
             "main": "boot",
             "defaultExtension": "ts"
+          },
+          "ng2-material": {
+            "defaultExtension": "js"
           }
+        },
+        map: {
+          "ng2-material": "node_modules/ng2-material"
         }
       });
       System.import('src/boot');

@@ -3,24 +3,31 @@ import * as Rx from 'rxjs/Rx';
 import {ICONSET} from './icon';
 import {zoom, addToBound, clear, clearMarker, animateMarker, addMarker} from './mapHelper';
 import {getCurrentLocation} from './location';
-declare var google;
+import {Observable} from "rxjs/Observable";
+import {StopPrediction} from '../interface';
+declare var google, window;
 
 @Injectable()
 export class MapService {
-  private _map: any;
-  private _bound: any;
-  private _lines: any;
-  private _buses: any;
-  private _stops: any;
-  private _placeService: any;
-  private _currentLocation: any;
+  private _map;
+  private _bound:any;
+  private _lines:any;
+  private _buses:any;
+  private _stops:any;
+  private _placeService:any;
+  private _currentLocation:any;
 
   get isInitialized() {
     return !!this._map;
   }
-  get currentLocation() { return getCurrentLocation(); }
 
-  constructor() {}
+  get currentLocation() {
+    return getCurrentLocation();
+  }
+
+  public setMap() {
+    this._map = window.googlemap;
+  }
 
   // option to clean other lines before drawing
   public drawPath(routeInfo, clearPath = true) {
@@ -53,6 +60,7 @@ export class MapService {
       this.drawBuses(newPosition);
     }
   }
+
   public drawBuses(buses) {
     if (this._buses) clearMarker(this._buses);
     console.log('first time drawing buses for new route:');
@@ -62,14 +70,24 @@ export class MapService {
       }
     });
   }
+
   // TODO: adjust stop marker size when zoom in and out.
   // TODO: show stop information when clicking on it.
-  public drawStops(stops) {
+  public drawStops(stops: Array<StopPrediction>, infoContent?: Array<string>) {
     if (this._stops) clearMarker(this._stops);
-    this._stops = stops.map(stop => {
-      return addMarker(this._map, stop, ICONSET.stop(google.maps.SymbolPath.CIRCLE));
+    this._stops = stops.map((stop, index) => {
+      const stop = addMarker(this._map, stop, ICONSET.stop(google.maps.SymbolPath.CIRCLE));
+      if (infoContent) {
+        const info = new google.maps.InfoWindow({
+          content: infoContent[index]
+        });
+        stop.marker.addListener('click', () => info.open(this._map, stop.marker));
+      }
+      return stop;
     });
   }
+
+
   // init //
   public loadMap(mapName) {
     let script = document.createElement('script');
@@ -81,15 +99,18 @@ export class MapService {
     // attach initMap to window
     (window)['initMap'] = () => this.initMap(mapName);
   }
+
   // init callback
   private initMap(mapName) {
     this._map = new google.maps.Map(document.querySelector(mapName), {
       center: {lat: 43.646389, lng: -79.408959},
       zoom: 15
     });
+    // add global variable
+    (window)['googlemap'] = this._map;
     this._bound = new google.maps.LatLngBounds();
     this._placeService = new google.maps.places.PlacesService(this._map);
-    getCurrentLocation().subscribe( pos => {
+    getCurrentLocation().subscribe(pos => {
       addMarker(this._map, pos, ICONSET.me(google.maps.SymbolPath.CIRCLE));
       // set current location
       this._currentLocation = pos;

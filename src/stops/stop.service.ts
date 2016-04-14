@@ -1,10 +1,12 @@
 import {Http} from 'angular2/http';
 import {Injectable} from 'angular2/core';
-import {Observable} from "rxjs/Observable";
+import {Observable, GroupedObservable} from "rxjs/Observable";
 import {xmlObservable} from './../bus/helper';
 import * as Rx from 'rxjs/Rx';
 import 'rxjs/add/operator/pluck';
-// import * as $ from 'jquery';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/mergeMap';
+import {StopPrediction} from "../interface";
 
 @Injectable()
 export class StopService {
@@ -21,20 +23,21 @@ export class StopService {
         .toArray();
   }
 
-  public getPrediction(stops:Array) {
-    return Rx.Observable.fromArray(stops)
-        .pluck('id')
-        .mergeMap(stopId => this.getStopInfo(stopId))
+  public getPrediction(stops:Array): GroupedObservable<StopPrediction> {
+    return Rx.Observable.from(stops)
+        .mergeMap(stop => this.getStopInfo(stop))
         .groupBy((info) => info.routeTag);
   }
 
-  private getStopInfo(stopId):Observable<any> {
-    return this._http.get(`http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=${stopId}`)
+  private getStopInfo(stop):Observable<any> {
+    return this._http.get(`http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=${stop.id}`)
         .map(res => $.parseXML(res.text()))
         .mergeMap(res => xmlObservable('//predictions', res))
         .mergeMap(p => {
           return Rx.Observable.create(observer => {
             observer.next({
+              lat: stop.lat,
+              lng: stop.lng,
               routeTitle: p.getAttribute('routeTitle'),
               routeTag: p.getAttribute('routeTag'),
               stopTitle: p.getAttribute('stopTitle'),

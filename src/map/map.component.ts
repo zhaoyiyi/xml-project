@@ -3,15 +3,7 @@ import {HTTP_PROVIDERS} from 'angular2/http';
 import {MapService} from './map.service';
 import {NearbyStopsComponent} from '../stops/nearbyStops.component.ts';
 import {Observable, Subscription} from 'rxjs';
-import * as Rx from 'rxjs/Rx';
-import 'rxjs/add/operator/distinctUntilChanged';
-import 'rxjs/add/operator/repeat';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/delay';
-import 'rxjs/add/operator/switchMap';
-import 'rxjs/add/operator/mergeMap';
-import 'rxjs/add/observable/interval';
-import 'rxjs/add/operator/pluck';
+
 
 declare var google;
 @Component({
