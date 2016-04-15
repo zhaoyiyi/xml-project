@@ -115,7 +115,7 @@ export class NearbyStopsComponent implements OnInit {
             if (stop.dir.length > 0) {
               text += stop.dir.map(direction => {
                 const prediction = direction.prediction[0] ? direction.prediction[0].min : '';
-                return `${direction.title} - ${prediction}min`;
+                return `${direction.title} - ${prediction}min<br>`;
               }).join();
             }
             return text;
