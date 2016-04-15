@@ -12,8 +12,6 @@ import {StopPrediction} from "../interface";
 export class StopService {
 
   private _radius = 0.0035;
-  get radius() {return this._radius}
-  set radius(value) {this._radius = value}
 
   constructor(private _http:Http) {
   }
