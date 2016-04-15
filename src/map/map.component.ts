@@ -9,8 +9,7 @@ declare var google;
 @Component({
   selector: 'map',
   template: `
-    <div id="map"></div>
-    <nearby-stops></nearby-stops>
+    <div id="map" style="width: 100%; height: 100vh;"></div>
   `,
   providers: [HTTP_PROVIDERS, MapService],
   inputs: ['routeInfoStream', 'locationStream', 'testStream'],

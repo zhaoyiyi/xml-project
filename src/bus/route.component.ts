@@ -1,8 +1,7 @@
 import {Component, OnInit, EventEmitter} from 'angular2/core';
+import {MATERIAL_DIRECTIVES} from "ng2-material/all";
 import {HTTP_PROVIDERS} from 'angular2/http';
 import {Control} from 'angular2/common';
-import * as Rx from 'rxjs/Rx';
-import {Observable} from 'rxjs';
 import 'rxjs/add/operator/combineLatest';
 
 
@@ -12,12 +11,21 @@ import {RouteService} from './route.service';
 @Component({
   selector: 'route',
   template: `
-    <h2>Route List</h2>
-    <select [ngFormControl]="routeControl">
-      <option *ngFor="#route of routes" [value]="route.tag">{{route.title}}</option>
-    </select>
+    <md-card>
+      <md-card-title>
+        <md-card-title-text>
+          <span class="md-headline">Route List</span>
+        </md-card-title-text>
+      </md-card-title>
+      <md-card-content>
+        <select [ngFormControl]="routeControl">
+          <option *ngFor="#route of routes" [value]="route.tag">{{route.title}}</option>
+        </select>
+      </md-card-content>
+    </md-card>
   `,
-  outputs: ['routeChange', 'locationChange', 'testChange'],
+  outputs: ['routeChange', 'locationChange'],
+  directive: [MATERIAL_DIRECTIVES],
   providers: [HTTP_PROVIDERS, RouteService]
 })
 export class RouteComponent implements OnInit {
@@ -25,7 +33,6 @@ export class RouteComponent implements OnInit {
   public routeControl: Control = new Control('');
   public routeChange = new EventEmitter();
   public locationChange = new EventEmitter();
-  public testChange = new EventEmitter();
   constructor(private _routeService: RouteService) {
     // output route coords and bus locations
     this.routeControl.valueChanges.subscribe(
@@ -35,9 +42,6 @@ export class RouteComponent implements OnInit {
         this.routeChange.emit( this._routeService.getRoute(routeNum) );
         console.log('emitting bus locations...');
         this.locationChange.emit( this._routeService.getBusLocations(routeNum));
-        // test here
-        console.log('>>>emitting test info');
-        this.testChange.emit( this._routeService.testPath(routeNum) );
       },
       err => console.log( 'err in route component when emitting', err )
     );

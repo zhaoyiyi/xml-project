@@ -87,6 +87,11 @@ export class MapService {
     });
   }
 
+  public setMapCenter(coords) {
+    this._map.setCenter(coords);
+    this._map.setZoom(18);
+  }
+
 
   // init //
   public loadMap(mapName) {

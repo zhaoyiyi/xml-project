@@ -1,43 +1,49 @@
 import {Component, OnInit} from 'angular2/core';
 import {MATERIAL_DIRECTIVES} from "ng2-material/all";
-import {NoEmptyArrayPipe} from './noEmptyArray.pipe.ts';
 import {PredictionPipe} from './prediction.pipe.ts';
 import {StopService} from "./stop.service.ts";
 import {MapService} from "../map/map.service.ts";
 import {StopPrediction} from '../interface';
-import {Observable, GroupedObservable} from "rxjs/Observable";
+import {Observable} from "rxjs/Observable";
+import { HTTP_PROVIDERS } from "angular2/http";
 
-// todo: closest, click to focus stop
 @Component({
   selector: 'nearby-stops',
   template: `
-    <p>Current location:{{currentLocation | json}} </p>
-    <button md-raised-button class="md-raised"
-      (click)="showNearbyStops()">show stops</button>
-    <button md-raised-button class="md-raised"
-      (click)="showClosestStop()">closest stop</button>
-    <md-content class="md-padding" *ngIf="routes">
-      <md-tabs md-dynamic-height md-border-bottom>
-        <template md-tab *ngFor="#route of routes" [label]="route.title" >
-          <md-list class="md-3-line">
-            <md-list-item *ngFor="#stop of route.stops">
-              <div class="md-list-item-text">
-                <h3 style="display: inline">{{stop.stopTitle}}</h3> 
-                <button md-raised-button class="md-mini md-primary"
-                  >show on map</button>
-                <p  *ngFor="#predictions of stop.dir">
-                  {{predictions.title}} in <span style="color: crimson">{{predictions.prediction | prediction}}</span> min
-                </p>
-              </div>
-            </md-list-item>
-          </md-list>
-        </template>
-      </md-tabs>
-    </md-content>
+    <md-card>
+      <md-card-content>
+        <button md-raised-button class="md-raised"
+          (click)="showNearbyStops()">show stops</button>
+        <button md-raised-button class="md-raised"
+          (click)="showClosestStop()">closest stop</button>
+      </md-card-content>
+    </md-card>
+    
+    <div  *ngIf="routes">
+      <md-card *ngFor="#route of routes">
+        <md-card-title>
+          <md-card-title-text>
+            <span class="md-headline">{{route.title}}</span>
+          </md-card-title-text>
+        </md-card-title>
+        <md-card-content layout="column" layout-fill layout-align="center">
+          <md-list class="md-3-line md-long-text">
+              <md-list-item *ngFor="#stop of route.stops">
+                <div class="md-list-item-text">
+                  <h3 (click)="focusStop(stop.lat, stop.lng)" style="cursor: pointer;">{{stop.stopTitle}}</h3> 
+                  <p  *ngFor="#predictions of stop.dir">
+                    {{predictions.title}} in <span style="color: crimson">{{predictions.prediction | prediction}}</span> min
+                  </p>
+                </div>
+              </md-list-item>
+            </md-list>
+        </md-card-content>
+      </md-card>
+    </div>
   `,
   directives: [MATERIAL_DIRECTIVES],
-  providers: [StopService, MapService],
-  pipes: [PredictionPipe, NoEmptyArrayPipe]
+  providers: [StopService, MapService, HTTP_PROVIDERS],
+  pipes: [PredictionPipe]
 })
 export class NearbyStopsComponent implements OnInit {
   routes:Array;
@@ -73,6 +79,10 @@ export class NearbyStopsComponent implements OnInit {
         this._drawStopInfo(Observable.of(this.closestStop));
       });
     })
+  }
+
+  focusStop(lat, lng) {
+    this._mapService.setMapCenter({lat: +lat, lng: +lng});
   }
 
   // ===== Private functions =====
