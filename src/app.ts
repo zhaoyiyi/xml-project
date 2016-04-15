@@ -9,12 +9,12 @@ import 'rxjs/add/operator/pluck';
   selector: `app`,
   template: `
     <div layout="column">
-      <md-sidenav-container layout="row" flex>
-        <md-sidenav name="left" align="left" layout="column" [style]="'side'">
+      <md-sidenav-container layout="row" flex style="padding-left: 450px;">
+        <md-sidenav name="left" align="left" layout="column" [style]="'side'" style="width: 450px; max-width: 500px;"  layout-padding>
           <md-toolbar class="md-theme-indigo">
             <h1 class="md-toolbar-tools">Real time TTC</h1>
           </md-toolbar>
-          <md-content style="overflow-y: auto" >
+          <md-content style="overflow-y: auto" layout-padding flex>
             <div layout="column" layout-fill layout-align="center">
               <route (routeChange)="onRouteChange($event)"
                 (locationChange)="onLocationChange($event)"
