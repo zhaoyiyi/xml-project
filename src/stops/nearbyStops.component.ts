@@ -7,29 +7,33 @@ import {MapService} from "../map/map.service.ts";
 import {StopPrediction} from '../interface';
 import {Observable, GroupedObservable} from "rxjs/Observable";
 
+// todo: closest, click to focus stop
 @Component({
   selector: 'nearby-stops',
   template: `
-     <p>Current location:{{currentLocation | json}} </p>
-     <button md-raised-button class="md-raised"
+    <p>Current location:{{currentLocation | json}} </p>
+    <button md-raised-button class="md-raised"
       (click)="showNearbyStops()">show stops</button>
-      
-      <md-content class="md-padding" *ngIf="routes">
-        <md-tabs md-dynamic-height md-border-bottom>
-          <template md-tab *ngFor="#route of routes" [label]="route.title" >
-            <md-list class="md-3-line">
-              <md-list-item *ngFor="#stop of route.stops">
-                <div class="md-list-item-text">
-                  <h3>{{stop.stopTitle}}</h3>
-                  <p  *ngFor="#predictions of stop.dir | noEmptyArray">
-                    {{predictions.title}} in <span style="color: crimson">{{predictions.prediction | prediction}}</span> min
-                  </p>
-                </div>
-              </md-list-item>
-            </md-list>
-          </template>
-        </md-tabs>
-      </md-content>
+    <button md-raised-button class="md-raised"
+      (click)="showClosestStop()">closest stop</button>
+    <md-content class="md-padding" *ngIf="routes">
+      <md-tabs md-dynamic-height md-border-bottom>
+        <template md-tab *ngFor="#route of routes" [label]="route.title" >
+          <md-list class="md-3-line">
+            <md-list-item *ngFor="#stop of route.stops">
+              <div class="md-list-item-text">
+                <h3 style="display: inline">{{stop.stopTitle}}</h3> 
+                <button md-raised-button class="md-mini md-primary"
+                  >show on map</button>
+                <p  *ngFor="#predictions of stop.dir">
+                  {{predictions.title}} in <span style="color: crimson">{{predictions.prediction | prediction}}</span> min
+                </p>
+              </div>
+            </md-list-item>
+          </md-list>
+        </template>
+      </md-tabs>
+    </md-content>
   `,
   directives: [MATERIAL_DIRECTIVES],
   providers: [StopService, MapService],
@@ -37,7 +41,9 @@ import {Observable, GroupedObservable} from "rxjs/Observable";
 })
 export class NearbyStopsComponent implements OnInit {
   routes:Array;
-  currentLocation:Object;
+  closestStop: StopPrediction;
+  currentLocation:Object = {lat: '', lng: ''};
+  prediction$: Observable;
 
   constructor(private _stopService:StopService,
               private _mapService:MapService) {
@@ -51,43 +57,74 @@ export class NearbyStopsComponent implements OnInit {
 
   // Click button, then ask for prediction and draw stops
   showNearbyStops() {
+    this._getPredictionStream( () => {
+      this._savePrediction(this.prediction$);
+      this._drawStopInfo(this.prediction$);
+    })
+  }
+
+  showClosestStop() {
+    this._getPredictionStream( () => {
+      this._getClosestLocation(this.prediction$, () => {
+        this.routes = [{
+          title: this.closestStop.routeTitle,
+          stops: [this.closestStop]
+        }];
+        this._drawStopInfo(Observable.of(this.closestStop));
+      });
+    })
+  }
+
+  // ===== Private functions =====
+
+  private _getPredictionStream(callback) {
     this._mapService.setMap();
     this._stopService.findStops(this.currentLocation)
         .subscribe(data => {
-              this.getPrediction(data);
-            },
-            err => console.log(err)
-        );
+          this.prediction$ = this._stopService.getPrediction(data)
+              .filter(stop => stop.dirNoPrediction === null)
+              .share();
+        }, error => console.log(err), () => callback());
   }
 
-  getPrediction(stops:Array) {
+  private _savePrediction(predictionStream:Observable) {
     this.routes = [];
-    this._stopService.getPrediction(stops)
-        .mergeMap(route => this._groupRoute(route))
-        .toArray()
-        .map( (stop: Array) => this._generateStopInfo(stop))
-        .subscribe(routeArray => {
-          console.log(routeArray);
+    predictionStream
+        .groupBy(stop => stop.routeTitle)
+        .subscribe(group => group.toArray().subscribe(stops => {
+          this.routes.push({title: stops[0].routeTitle, stops: stops})
+        }));
+  }
+
+  // Add stop tooltip and draw stops on map
+  private _drawStopInfo(predictionStream:Observable) {
+    predictionStream.toArray()
+        .subscribe(stops => {
+          const info = stops.map((stop: StopPrediction) => {
+            let text = `${stop.stopTitle}<br>`;
+            if (stop.dir.length > 0) {
+              text += stop.dir.map(direction => {
+                const prediction = direction.prediction[0] ? direction.prediction[0].min : '';
+                return `${direction.title} - ${prediction}min`;
+              }).join();
+            }
+            return text;
+          });
+          this._mapService.drawStops(stops, info);
         });
   }
 
-  private _generateStopInfo(stops: Array<StopPrediction>) {
-    const info =  stops.map(stop => {
-      let text = `${stop.stopTitle}<br>`;
-      if (stop.dir.length > 0) {
-        text += `${stop.dir[0].title}<br>`;
-        if (stop.dir[0].prediction.length > 0) text += `${stop.dir[0].prediction[0].min}min`
-      }
-      return text;
-    });
-    this._mapService.drawStops(stops, info);
-    return stops;
-  }
 
-  private _groupRoute(route: GroupedObservable<StopPrediction>) {
-    route.toArray().map( (r: Array) => {
-      this.routes.push({title: r[0].routeTitle, stops: r})
-    }).subscribe();
-    return route;
+  private _getClosestLocation(prediction$: Observable, onComplete = () => {}) {
+    const loc = this.currentLocation;
+    prediction$.toArray().subscribe(stops => {
+      const result = stops.reduce((acc, stop) => {
+        const dLat = Math.abs(+stop.lat) - Math.abs(loc.lat);
+        const dLng = Math.abs(+stop.lng) - Math.abs(loc.lng);
+        const distance = Math.sqrt(dLat * dLat + dLng * dLng);
+        return acc.diff > distance ? {diff: distance, stop} : acc;
+      }, {diff: 1, stop: {}});
+      this.closestStop = result.stop;
+    }, err => console.log(err), () => onComplete());
   }
 }

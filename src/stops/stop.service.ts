@@ -11,6 +11,10 @@ import {StopPrediction} from "../interface";
 @Injectable()
 export class StopService {
 
+  private _radius = 0.0035;
+  get radius() {return this._radius}
+  set radius(value) {this._radius = value}
+
   constructor(private _http:Http) {
   }
 
@@ -25,8 +29,7 @@ export class StopService {
 
   public getPrediction(stops:Array): GroupedObservable<StopPrediction> {
     return Rx.Observable.from(stops)
-        .mergeMap(stop => this.getStopInfo(stop))
-        .groupBy((info) => info.routeTag);
+        .mergeMap(stop => this.getStopInfo(stop));
   }
 
   private getStopInfo(stop):Observable<any> {
@@ -74,10 +77,8 @@ export class StopService {
   }
 
   private round(num1, num2) {
-    let n = Math.pow(10, 2);
     let a = Math.abs(num1);
     let b = Math.abs(num2);
-    //return Math.floor( +num1 * n ) === Math.floor( +num2 * n);
-    return Math.abs(a - b) <= 0.0035;
+    return Math.abs(a - b) <= this._radius;
   }
 }
