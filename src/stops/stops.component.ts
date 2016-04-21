@@ -1,4 +1,4 @@
-import {Component, OnInit} from 'angular2/core';
+import {Component, OnInit, EventEmitter} from 'angular2/core';
 import {MATERIAL_DIRECTIVES} from "ng2-material/all";
 import {PredictionPipe} from './prediction.pipe.ts';
 import {StopService} from "./stop.service.ts";
@@ -8,7 +8,7 @@ import {Observable} from "rxjs/Observable";
 import { HTTP_PROVIDERS } from "angular2/http";
 
 @Component({
-  selector: 'nearby-stops',
+  selector: 'stops',
   template: `
     <md-card>
       <md-card-content>
@@ -23,7 +23,8 @@ import { HTTP_PROVIDERS } from "angular2/http";
       <md-card *ngFor="#route of routes">
         <md-card-title>
           <md-card-title-text>
-            <span class="md-headline">{{route.title}}</span>
+            <span class="md-headline" style="cursor: pointer;"
+            (click)="showRoute(route)">{{route.title}}</span>
           </md-card-title-text>
         </md-card-title>
         <md-card-content layout="column" layout-fill layout-align="center">
@@ -41,18 +42,20 @@ import { HTTP_PROVIDERS } from "angular2/http";
       </md-card>
     </div>
   `,
+  outputs: ['routeChange'],
   directives: [MATERIAL_DIRECTIVES],
-  providers: [StopService, MapService, HTTP_PROVIDERS],
+  providers: [StopService, HTTP_PROVIDERS],
   pipes: [PredictionPipe]
 })
-export class NearbyStopsComponent implements OnInit {
+export class StopsComponent implements OnInit {
   routes:Array;
   closestStop: StopPrediction;
+  public routeChange = new EventEmitter();
   currentLocation:Object = {lat: '', lng: ''};
   prediction$: Observable;
 
-  constructor(private _stopService:StopService,
-              private _mapService:MapService) {
+  constructor(private _stopService: StopService,
+              private _mapService: MapService) {
   }
 
   ngOnInit() {
@@ -85,10 +88,14 @@ export class NearbyStopsComponent implements OnInit {
     this._mapService.setMapCenter({lat: +lat, lng: +lng});
   }
 
+  showRoute(route) {
+    const routeTag = route.stops[0].routeTag;
+    this.routeChange.emit(routeTag);
+  }
+
   // ===== Private functions =====
 
   private _getPredictionStream(callback) {
-    this._mapService.setMap();
     this._stopService.findStops(this.currentLocation)
         .subscribe(data => {
           this.prediction$ = this._stopService.getPrediction(data)

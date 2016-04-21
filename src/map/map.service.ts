@@ -25,10 +25,6 @@ export class MapService {
     return getCurrentLocation();
   }
 
-  public setMap() {
-    this._map = window.googlemap;
-  }
-
   // option to clean other lines before drawing
   public drawPath(routeInfo, clearPath = true) {
     if (this._lines && clearPath) clear(this._lines);
@@ -111,8 +107,7 @@ export class MapService {
       center: {lat: 43.646389, lng: -79.408959},
       zoom: 15
     });
-    // add global variable
-    (window)['googlemap'] = this._map;
+    
     this._bound = new google.maps.LatLngBounds();
     this._placeService = new google.maps.places.PlacesService(this._map);
     getCurrentLocation().subscribe(pos => {

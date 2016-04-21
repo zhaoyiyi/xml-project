@@ -1,16 +1,21 @@
 import {Injectable} from 'angular2/core';
 import {Http} from 'angular2/http';
-import * as Rx from 'rxjs/Rx';
 import {Observable} from 'rxjs';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
-import jquery from 'jquery';
 
 
 const URL = `http://webservices.nextbus.com/service/publicXMLFeed?a=ttc`;
 
 @Injectable()
 export class RouteService {
+  private _currentRoute: String;
+
+  set currentRoute(value) {
+    this._currentRoute = value;
+    console.log(value);
+  }
+
   constructor(private _http: Http) {}
 
   public getBusLocations(num): Observable<any> {
@@ -71,47 +76,7 @@ export class RouteService {
       };
     });
   }
-  public testPath(num): Observable<any> {
-    return this.query( 'routeConfig', `r=${num}`)
-      .mergeMap( route => this.xmlObservable('//route/path', route)
-        .mergeMap( path => this.xmlObservable('point', path)
-          .map( point => {
-            // puts lag lng in a object
-            return {
-              lat: +point.getAttribute('lat'),
-              lng: +point.getAttribute('lon')
-            };
-            // add all points to an array
-          }).toArray()
-        )
-      )
-      .map( (path: HTMLElement) => {
-        return path;
-      });
-  }
-  // public testStop(num): Observable<any> {
-  //   return this.query( 'routeConfig', `r=${num}`)
-  //     .mergeMap( route => this.xmlObservable('//route/stop', route) )
-  //     .map( (stop: HTMLElement) => {
-  //       return {
-  //         tag: stop.getAttribute('tag'),
-  //         title: stop.getAttribute('title'),
-  //         lat: stop.getAttribute('lat'),
-  //         lng: stop.getAttribute('lon')
-  //       };
-  //     });
-  // }
-  private xmlObservable(xpath, contextNode) {
-    let nodeList = document.evaluate(xpath, contextNode, null, XPathResult.ANY_TYPE, null);
-    return Rx.Observable.create( observer => {
-      let node = nodeList.iterateNext();
-      while (node) {
-        observer.next(node);
-        node = nodeList.iterateNext();
-      }
-      observer.complete();
-    });
-  }
+
   private attrArray(xmlObj, attrName) {
     let xmlNodes = xmlObj.querySelectorAll(attrName);
     return jQuery.makeArray(xmlNodes);

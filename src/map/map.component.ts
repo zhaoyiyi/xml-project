@@ -1,7 +1,6 @@
 import {Component, OnInit, OnChanges, EventEmitter} from 'angular2/core';
 import {HTTP_PROVIDERS} from 'angular2/http';
 import {MapService} from './map.service';
-import {NearbyStopsComponent} from '../stops/nearbyStops.component.ts';
 import {Observable, Subscription} from 'rxjs';
 
 
@@ -11,9 +10,8 @@ declare var google;
   template: `
     <div id="map" style="width: 100%; height: 100vh;"></div>
   `,
-  providers: [HTTP_PROVIDERS, MapService],
+  providers: [HTTP_PROVIDERS],
   inputs: ['routeInfoStream', 'locationStream', 'testStream'],
-  directives: [NearbyStopsComponent]
 })
 export class MapComponent implements OnInit, OnChanges {
   public routeInfoStream:Observable<any>;

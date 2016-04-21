@@ -1,7 +1,10 @@
 import { Component } from 'angular2/core';
 import { RouteComponent } from './bus/route.component';
-import { NearbyStopsComponent } from './stops/nearbyStops.component.ts';
+import { StopsComponent } from './stops/stops.component.ts';
 import { MapComponent } from './map/map.component';
+import { MapService } from './map/map.service';
+import { RouteService } from './bus/route.service';
+import { HTTP_PROVIDERS } from 'angular2/http';
 import { MATERIAL_DIRECTIVES, Media, SidenavService } from "ng2-material/all";
 import 'rxjs/add/operator/pluck';
 
@@ -16,11 +19,10 @@ import 'rxjs/add/operator/pluck';
           </md-toolbar>
           <md-content style="overflow-y: auto" layout-padding flex>
             <div layout="column" layout-fill layout-align="center">
-              <route (routeChange)="onRouteChange($event)"
-                (locationChange)="onLocationChange($event)"
-                (testChange)="onTestChange($event)">
+              <route (routeChange)="onRouteChange($event)">
               </route>
-              <nearby-stops></nearby-stops>
+              <stops (routeChange)="onRouteChange($event)">
+              </stops>
             </div>
           </md-content>
         </md-sidenav>
@@ -33,27 +35,24 @@ import 'rxjs/add/operator/pluck';
     </div>
     
   `,
-  providers: [SidenavService],
-  directives: [RouteComponent, MapComponent, NearbyStopsComponent, MATERIAL_DIRECTIVES],
-  inputs: ['routeChange', 'locationChange']
+  providers: [SidenavService, MapService, RouteService, HTTP_PROVIDERS],
+  directives: [RouteComponent, MapComponent, StopsComponent, MATERIAL_DIRECTIVES],
+  inputs: ['routeChange']
 })
 export class App {
   // take path coords emitted by route component and pass it to map component
   public routeInfoStream:any;
   public locationStream:any;
 
-  constructor(private _sidenavService:SidenavService) {
+  constructor(private _sidenavService:SidenavService,
+              private _routeService:RouteService) {
     // _sidenavService.show('left');
   }
 
-  public onRouteChange(routeInfo) {
-    this.routeInfoStream = routeInfo;
-    console.log('transferring route info...');
-  }
-
-  public onLocationChange(busLocations) {
-    this.locationStream = busLocations;
-    console.log('transferring bus locations...');
+  public onRouteChange(routeNum) {
+    this.routeInfoStream = this._routeService.getRoute(routeNum);
+    this.locationStream = this._routeService.getBusLocations(routeNum);
+    console.log('sending route info...');
   }
 
 }
