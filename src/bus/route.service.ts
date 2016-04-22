@@ -5,19 +5,15 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
 
-const URL = `http://webservices.nextbus.com/service/publicXMLFeed?a=ttc`;
+// const URL = `http://webservices.nextbus.com/service/publicXMLFeed?a=ttc`;
+const URL = `https://yizhao.me/work/ttc/server/route.php?a=ttc`;
 
 @Injectable()
 export class RouteService {
-  private _currentRoute: String;
-
-  set currentRoute(value) {
-    this._currentRoute = value;
-    console.log(value);
-  }
 
   constructor(private _http: Http) {}
 
+  // Get bus locations
   public getBusLocations(num): Observable<any> {
     return this.query('vehicleLocations', `r=${num}`, `t=0`).map( res =>
       this.attrArray(res, 'vehicle').map( bus => {
@@ -38,7 +34,7 @@ export class RouteService {
   // 1. map observable returned by query
   // 2. get all nodes called `route`
   // 3. map each and return an Object with tag and title
-  public getRouteList(): Observable<any> {
+  public getRouteList(): Observable {
     return this.query('routeList').map(routes =>
       this.attrArray(routes, 'route').map(route => {
         return {
@@ -48,8 +44,9 @@ export class RouteService {
       })
     );
   }
-  // TODO: try make use of observable stream to do map and filter
-  public getRoute(num): Observable<any> {
+
+  // Get coords for all stops of one bus route
+  public getRoute(num): Observable {
     return this.query( 'routeConfig', `r=${num}`).map( routes => {
       let coords = this.attrArray(routes, 'path').map( path =>
         this.attrArray(path, 'point').map ( point => {
@@ -77,10 +74,13 @@ export class RouteService {
     });
   }
 
+  // Convenient function to parse xml to arrays
   private attrArray(xmlObj, attrName) {
     let xmlNodes = xmlObj.querySelectorAll(attrName);
     return jQuery.makeArray(xmlNodes);
   }
+
+  // Make request to api
   private query(cmd: string, ...options: string[]): Observable<any> {
     return this._http.get( `${URL}&command=${cmd}&` + options.join('&') )
       .map( res => jQuery.parseXML( res.text() ) );

@@ -1,7 +1,7 @@
-import {Component, OnInit, OnChanges, EventEmitter} from 'angular2/core';
-import {HTTP_PROVIDERS} from 'angular2/http';
-import {MapService} from './map.service';
-import {Observable, Subscription} from 'rxjs';
+import { Component, OnInit, OnChanges, EventEmitter } from 'angular2/core';
+import { HTTP_PROVIDERS } from 'angular2/http';
+import { MapService } from './map.service';
+import { Observable, Subscription } from 'rxjs';
 
 
 declare var google;
@@ -20,7 +20,8 @@ export class MapComponent implements OnInit, OnChanges {
   public busLocations:Subscription;
   public stops:any;
 
-  constructor(private _mapService:MapService) { }
+  constructor(private _mapService:MapService) {
+  }
 
   public ngOnInit() {
     this._mapService.loadMap('#map');
@@ -31,6 +32,7 @@ export class MapComponent implements OnInit, OnChanges {
     if (this.locationStream) this.initBuses();
   }
 
+  // Draw bus route on map
   public updateRoute() {
     this.routeInfoStream
         .distinctUntilChanged((a, b) => a.id === b.id)
@@ -46,14 +48,13 @@ export class MapComponent implements OnInit, OnChanges {
     if (this.busLocations) this.busLocations.unsubscribe();
 
     this.busLocations = this.locationStream
-        .subscribe(data => {
-              this._mapService.drawBuses(data);
-            },
+        .subscribe(data => this._mapService.drawBuses(data),
             err => console.log(err),
             () => this.updateBusLocation()
         );
   }
 
+  // try refresh bus locations every 10 seconds
   public updateBusLocation() {
     this.busLocations = this.locationStream
         .delay(10000)

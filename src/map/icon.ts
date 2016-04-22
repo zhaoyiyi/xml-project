@@ -1,5 +1,5 @@
 declare var google;
-
+// Icon settings
 export const ICONSET = {
   stop: function stop(path) {
     return {

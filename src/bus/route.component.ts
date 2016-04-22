@@ -2,8 +2,6 @@ import { Component, OnInit, EventEmitter } from 'angular2/core';
 import { MATERIAL_DIRECTIVES } from "ng2-material/all";
 import { Control } from 'angular2/common';
 import 'rxjs/add/operator/combineLatest';
-
-
 import { RouteService } from './route.service';
 
 
@@ -32,13 +30,14 @@ export class RouteComponent implements OnInit {
   public routeChange = new EventEmitter();
 
   constructor(private _routeService:RouteService) {
-    // output route coords and bus locations
+    // Emit route number when change item in dropdown list
     this.routeControl.valueChanges.subscribe(
         routeNum => this.routeChange.emit(routeNum),
         err => console.log('err in route component when emitting', err)
     );
   }
 
+  // Get route list when app start
   ngOnInit() {
     this.getRouteList();
   }

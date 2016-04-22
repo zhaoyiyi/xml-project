@@ -31,7 +31,8 @@ export class StopService {
   }
 
   private getStopInfo(stop):Observable<any> {
-    return this._http.get(`http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=${stop.id}`)
+    return this._http.get(`https://yizhao.me/work/ttc/server/route.php?command=predictions&a=ttc&stopId=${stop.id}`)
+    // return this._http.get(`http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=ttc&stopId=${stop.id}`)
         .map(res => $.parseXML(res.text()))
         .mergeMap(res => xmlObservable('//predictions', res))
         .mergeMap(p => {
