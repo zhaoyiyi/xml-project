@@ -1,10 +1,10 @@
-import {Component, OnInit, EventEmitter} from 'angular2/core';
-import {MATERIAL_DIRECTIVES} from "ng2-material/all";
-import {PredictionPipe} from './prediction.pipe.ts';
-import {StopService} from "./stop.service.ts";
-import {MapService} from "../map/map.service.ts";
-import {StopPrediction} from '../interface';
-import {Observable} from "rxjs/Observable";
+import { Component, OnInit, EventEmitter } from 'angular2/core';
+import { MATERIAL_DIRECTIVES } from "ng2-material/all";
+import { PredictionPipe } from './prediction.pipe.ts';
+import { StopService } from "./stop.service.ts";
+import { MapService } from "../map/map.service.ts";
+import { StopPrediction } from '../interface';
+import { Observable } from "rxjs/Observable";
 import { HTTP_PROVIDERS } from "angular2/http";
 
 @Component({
@@ -48,10 +48,10 @@ import { HTTP_PROVIDERS } from "angular2/http";
   pipes: [PredictionPipe]
 })
 export class StopsComponent implements OnInit {
-  routes:Array;
+  routes: Array;
   closestStop: StopPrediction;
   public routeChange = new EventEmitter();
-  currentLocation:Object = {lat: '', lng: ''};
+  currentLocation: Object = { lat: '', lng: '' };
   prediction$: Observable;
 
   constructor(private _stopService: StopService,
@@ -66,14 +66,14 @@ export class StopsComponent implements OnInit {
 
   // Click button, then ask for prediction and draw stops
   showNearbyStops() {
-    this._getPredictionStream( () => {
+    this._getPredictionStream(() => {
       this._savePrediction(this.prediction$);
       this._drawStopInfo(this.prediction$);
     })
   }
 
   showClosestStop() {
-    this._getPredictionStream( () => {
+    this._getPredictionStream(() => {
       this._getClosestLocation(this.prediction$, () => {
         this.routes = [{
           title: this.closestStop.routeTitle,
@@ -85,10 +85,11 @@ export class StopsComponent implements OnInit {
   }
 
   focusStop(lat, lng) {
-    this._mapService.setMapCenter({lat: +lat, lng: +lng});
+    this._mapService.setMapCenter({ lat: +lat, lng: +lng });
   }
 
   showRoute(route) {
+    document.querySelector('select').value = route.stops[0].routeTag;
     const routeTag = route.stops[0].routeTag;
     this.routeChange.emit(routeTag);
   }
@@ -101,20 +102,20 @@ export class StopsComponent implements OnInit {
           this.prediction$ = this._stopService.getPrediction(data)
               .filter(stop => stop.dirNoPrediction === null)
               .share();
-        }, error => console.log(err), () => callback());
+        }, error => console.log(error), () => callback());
   }
 
-  private _savePrediction(predictionStream:Observable) {
+  private _savePrediction(predictionStream: Observable) {
     this.routes = [];
     predictionStream
         .groupBy(stop => stop.routeTitle)
         .subscribe(group => group.toArray().subscribe(stops => {
-          this.routes.push({title: stops[0].routeTitle, stops: stops})
+          this.routes.push({ title: stops[0].routeTitle, stops: stops })
         }));
   }
 
   // Add stop tooltip and draw stops on map
-  private _drawStopInfo(predictionStream:Observable) {
+  private _drawStopInfo(predictionStream: Observable) {
     predictionStream.toArray()
         .subscribe(stops => {
           const info = stops.map((stop: StopPrediction) => {
@@ -132,15 +133,16 @@ export class StopsComponent implements OnInit {
   }
 
 
-  private _getClosestLocation(prediction$: Observable, onComplete = () => {}) {
+  private _getClosestLocation(prediction$: Observable, onComplete = () => {
+  }) {
     const loc = this.currentLocation;
     prediction$.toArray().subscribe(stops => {
       const result = stops.reduce((acc, stop) => {
         const dLat = Math.abs(+stop.lat) - Math.abs(loc.lat);
         const dLng = Math.abs(+stop.lng) - Math.abs(loc.lng);
         const distance = Math.sqrt(dLat * dLat + dLng * dLng);
-        return acc.diff > distance ? {diff: distance, stop} : acc;
-      }, {diff: 1, stop: {}});
+        return acc.diff > distance ? { diff: distance, stop } : acc;
+      }, { diff: 1, stop: {} });
       this.closestStop = result.stop;
     }, err => console.log(err), () => onComplete());
   }
