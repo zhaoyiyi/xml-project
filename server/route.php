@@ -1,24 +1,18 @@
 <?php
+// Make request to get xml files and echo.
 
-
-include "autoloader.php";
+// target api url
 define('URL', 'http://webservices.nextbus.com/service/publicXMLFeed');
-
-$url = addslashes('/work/ttc/server/route.php');
+// server path
+define('PATH', '/work/ttc/server/route.php');
 
 $requestUrl = $_SERVER['REQUEST_URI'];
 
-$diff = substr($requestUrl, strlen($url));
-//var_dump($requestUrl, $diff);
+$diff = substr($requestUrl, strlen(PATH));
 $opts = array(
-    'http'=>array(
-        'method'=>"GET"
-    )
+    'http' => ['method' => "GET"]
 );
-
 $context = stream_context_create($opts);
-
-// Open the file using the HTTP headers set above
 $file = file_get_contents(URL . $diff, false, $context);
 
 header("Content-Type: text/xml");

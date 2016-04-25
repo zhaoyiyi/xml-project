@@ -69,6 +69,7 @@ export class StopsComponent implements OnInit {
     this._getPredictionStream(() => {
       this._savePrediction(this.prediction$);
       this._drawStopInfo(this.prediction$);
+      this._mapService.clearLine();
     })
   }
 
@@ -79,15 +80,18 @@ export class StopsComponent implements OnInit {
           title: this.closestStop.routeTitle,
           stops: [this.closestStop]
         }];
+        this._mapService.clearLine();
         this._drawStopInfo(Observable.of(this.closestStop));
       });
     })
   }
 
+  // Zoom to the point on click
   focusStop(lat, lng) {
     this._mapService.setMapCenter({ lat: +lat, lng: +lng });
   }
 
+  // Notify parent component to draw route on map
   showRoute(route) {
     document.querySelector('select').value = route.stops[0].routeTag;
     const routeTag = route.stops[0].routeTag;
@@ -96,6 +100,7 @@ export class StopsComponent implements OnInit {
 
   // ===== Private functions =====
 
+  // find near by stops, and share the stream
   private _getPredictionStream(callback) {
     this._stopService.findStops(this.currentLocation)
         .subscribe(data => {
@@ -105,6 +110,7 @@ export class StopsComponent implements OnInit {
         }, error => console.log(error), () => callback());
   }
 
+  // Save stop prediction
   private _savePrediction(predictionStream: Observable) {
     this.routes = [];
     predictionStream
@@ -132,7 +138,7 @@ export class StopsComponent implements OnInit {
         });
   }
 
-
+  // Calculate the closet stop
   private _getClosestLocation(prediction$: Observable, onComplete = () => {
   }) {
     const loc = this.currentLocation;

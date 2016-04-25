@@ -1,21 +1,21 @@
-import {Injectable, Inject} from 'angular2/core';
+import { Injectable, Inject } from 'angular2/core';
 import * as Rx from 'rxjs/Rx';
-import {ICONSET} from './icon';
-import {zoom, addToBound, clear, clearMarker, animateMarker, addMarker} from './mapHelper';
-import {getCurrentLocation} from './location';
-import {Observable} from "rxjs/Observable";
-import {StopPrediction} from '../interface';
+import { ICONSET } from './icon';
+import { zoom, addToBound, clear, clearMarker, animateMarker, addMarker } from './mapHelper';
+import { getCurrentLocation } from './location';
+import { Observable } from "rxjs/Observable";
+import { StopPrediction } from '../interface';
 declare var google, window;
 
 @Injectable()
 export class MapService {
   private _map;
-  private _bound:any;
-  private _lines:any;
-  private _buses:any;
-  private _stops:any;
-  private _placeService:any;
-  private _currentLocation:any;
+  private _bound: any;
+  private _lines: any;
+  private _buses: any;
+  private _stops: any;
+  private _placeService: any;
+  private _currentLocation: any;
 
   get isInitialized() {
     return !!this._map;
@@ -27,7 +27,7 @@ export class MapService {
 
   // option to clean other lines before drawing
   public drawPath(routeInfo, clearPath = true) {
-    if (this._lines && clearPath) clear(this._lines);
+    if (clearPath) this.clearLine();
     // clears bounds
     if (this._bound) this._bound = new google.maps.LatLngBounds();
     this._lines = routeInfo.map(path => {
@@ -39,6 +39,10 @@ export class MapService {
       zoom(this._map, this._bound);
       return line;
     });
+  }
+
+  public clearLine() {
+    if (this._lines) clear(this._lines);
   }
 
   // TODO:0 need better way to update buses on the Map
@@ -104,10 +108,10 @@ export class MapService {
   // init callback
   private initMap(mapName) {
     this._map = new google.maps.Map(document.querySelector(mapName), {
-      center: {lat: 43.646389, lng: -79.408959},
+      center: { lat: 43.646389, lng: -79.408959 },
       zoom: 15
     });
-    
+
     this._bound = new google.maps.LatLngBounds();
     this._placeService = new google.maps.places.PlacesService(this._map);
     getCurrentLocation().subscribe(pos => {
