@@ -3,7 +3,7 @@
 ##[Go to project](https://yizhao.me/work/ttc/)
 
 
-<img src="https://raw.githubusercontent.com/zhaoyiyi/xml-project/master/screenshots/ttc2" height="500px">
+<img src="https://raw.githubusercontent.com/zhaoyiyi/xml-project/master/screenshots/ttc2.png">
 
 API: [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/)
 
