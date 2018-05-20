@@ -5,8 +5,8 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
 
-// const URL = `http://webservices.nextbus.com/service/publicXMLFeed?a=ttc`;
-const URL = `https://yizhao.me/work/ttc/server/route.php?a=ttc`;
+const URL = `http://webservices.nextbus.com/service/publicXMLFeed?a=ttc`;
+// const URL = `/server/route.php?a=ttc`;
 
 @Injectable()
 export class RouteService {
