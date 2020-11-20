@@ -2,7 +2,7 @@
   "name": "xml-final-project",
   "version": "1.0.0",
   "scripts": {
-    "lite": "lite-server"
+    "dev": "lite-server"
   },
   "license": "ISC",
   "dependencies": {
@@ -19,6 +19,7 @@
     "zone.js": "0.6.6"
   },
   "devDependencies": {
+    "lite-server": "^2.6.1",
     "typescript": "^1.7.3"
   }
 }
