@@ -1,5 +1,6 @@
 FROM node:10-alpine
+ENV PORT=${PORT}
 WORKDIR /app
 COPY . .
 RUN npm install
-CMD node server/index.js
+CMD npm run start

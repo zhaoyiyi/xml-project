@@ -2,7 +2,7 @@
   "name": "xml-final-project",
   "version": "1.0.0",
   "scripts": {
-    "dev": "lite-server"
+    "start": "lite-server"
   },
   "license": "ISC",
   "dependencies": {
