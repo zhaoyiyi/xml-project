@@ -6,12 +6,13 @@ on:
 
 jobs:
   deploy-personal-website:
-    name: Lint code base
+    name: Deploy personal website
     runs-on: ubuntu-latest
     steps:
       - name: call vercel deploy hook
         run: curl -X POST https://api.vercel.com/v1/integrations/deploy/prj_17BoYd5KUTmb3evvGxmZASOWrfJA/Dc6yATVZZV
   deploy-heroku:
+    name: Deploy app to heroku
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
